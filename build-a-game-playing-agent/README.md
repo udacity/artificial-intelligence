@@ -1,5 +1,5 @@
 
-# Build a Game Playing Agent
+# Build a Game-playing Agent
 
 ## Synopsis
 
