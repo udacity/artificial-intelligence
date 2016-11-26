@@ -9,6 +9,10 @@ relative strength using run_tournament.py and include the results in your
 report.
 """
 
+class Timeout(Exception):
+    """ Subclass base exception for code clarity. """
+    pass
+
 
 class CustomEval():
     """
@@ -77,6 +81,8 @@ class CustomPlayer():
         self.search_depth = search_depth
         self.iterative = iterative
         self.method = method
+        self.time_left = None
+        self.TIMER_THRESHOLD = 10  # time (in ms) to leave on the clock when terminating search
 
     def get_move(self, game, legal_moves, time_left):
         """
@@ -114,8 +120,27 @@ class CustomPlayer():
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
+        self.time_left = time_left
 
         # TODO: finish this function!
+
+        # Perform any required initializations
+
+        try:
+
+            # The search method call (alpha beta or minimax) should happen in
+            # here in order to avoid timeout. The try/except block will
+            # automatically catch the exception raised by the search method
+            # when the timer gets close to expiring
+            pass
+
+        except Timeout:
+
+            # Handle any actions required at timeout, if necessary
+            pass
+
+        # Return the best move from the last completed search iteration
+
         raise NotImplementedError
 
     def minimax(self, game, depth, maximizing_player=True):
@@ -154,6 +179,8 @@ class CustomPlayer():
 
             YOU ARE ALLOWED TO CHANGE THE OUTPUT INTERFACE OF THIS FUNCTION
         """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise Timeout()
 
         # TODO: finish this function!
         raise NotImplementedError
@@ -201,6 +228,8 @@ class CustomPlayer():
 
             YOU ARE ALLOWED TO CHANGE THE OUTPUT INTERFACE OF THIS FUNCTION
         """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise Timeout()
 
         # TODO: finish this function!
         raise NotImplementedError
