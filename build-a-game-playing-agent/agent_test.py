@@ -6,6 +6,7 @@ interface, but cannot be automatically assessed for correctness.
 """
 import unittest
 import timeit
+import signal
 
 import isolation
 import game_agent
@@ -13,6 +14,7 @@ import game_agent
 from collections import Counter
 from copy import deepcopy
 from copy import copy
+from functools import wraps
 
 
 WRONG_MOVE = "Your {} search returned an invalid move at search depth {}." + \
@@ -35,9 +37,43 @@ ID_ERROR = "Your ID search returned the wrong move at a depth of {} with " + \
 ID_FAIL = "Your agent did not explore enough nodes during the search; it " + \
           "did not finish the first layer of available moves."
 
+TIMER_MARGIN = 15  # time (in ms) to leave on the timer to avoid timeout
+
 
 def curr_time_millis():
     return 1000 * timeit.default_timer()
+
+
+def timeout(time_limit):
+    """
+    Function decorator for unittest test cases to specify test case timeout.
+    """
+
+    class TimeoutException(Exception):
+        """ Subclass Exception to catch timer expiration during search """
+        pass
+
+    def handler(*args, **kwargs):
+        """ Generic handler to raise an exception when a timer expires """
+        raise TimeoutException("Test aborted due to timeout. Test was " +
+            "expected to finish in less than {} second(s).".format(time_limit))
+
+    def wrapUnitTest(testcase):
+
+        @wraps(testcase)
+        def testWrapper(self, *args, **kwargs):
+
+            signal.signal(signal.SIGALRM, handler)
+            signal.alarm(time_limit)
+
+            try:
+                return testcase(self, *args, **kwargs)
+            finally:
+                signal.alarm(0)
+
+        return testWrapper
+
+    return wrapUnitTest
 
 
 class EvalTable():
@@ -95,6 +131,7 @@ class Project1Test(unittest.TestCase):
         board.apply_move(loc2)
         return agentUT, board
 
+    @timeout(1)
     # @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
     def test_minimax(self):
         """ Test CustomPlayer.minimax """
@@ -129,6 +166,7 @@ class Project1Test(unittest.TestCase):
             self.assertIn(move, expected_moves[idx],
                 WRONG_MOVE.format(method, depth, expected_moves[idx], move))
 
+    @timeout(1)
     # @unittest.skip("Skip alpha-beta test.")  # Uncomment this line to skip test
     def test_alphabeta(self):
         """ Test CustomPlayer.alphabeta """
@@ -165,6 +203,7 @@ class Project1Test(unittest.TestCase):
             self.assertIn(move, expected_moves[idx],
                 WRONG_MOVE.format(method, depth, expected_moves[idx], move))
 
+    @timeout(1)
     # @unittest.skip("Skip alpha-beta pruning test.")  # Uncomment this line to skip test
     def test_alphabeta_pruning(self):
         """ Test pruning in CustomPlayer.alphabeta """
@@ -201,6 +240,7 @@ class Project1Test(unittest.TestCase):
         self.assertEqual(move, expected_move,
             WRONG_MOVE.format(method, depth, expected_move, move))
 
+    @timeout(10)
     # @unittest.skip("Skip iterative deepening test.")  # Uncomment this line to skip test
     def test_id(self):
         """ Test iterative deepening for CustomPlayer.minimax """
@@ -224,7 +264,7 @@ class Project1Test(unittest.TestCase):
                         ((38366, 74), set([(0, 3), (2, 3), (3, 0), (3, 2)]))]
 
         time_limit = 3200
-        while time_limit >= 12:
+        while time_limit >= TIMER_MARGIN:
             agentUT, board = self.initAUT(-1, eval_fn, True, method, (1, 1), (0, 0), w, h)
 
             legal_moves = board.get_legal_moves()
@@ -253,7 +293,7 @@ class Project1Test(unittest.TestCase):
                 self.assertIn(move, c, ID_ERROR.format(depths[idx], 2 * time_limit, move, *board.counts))
                 break
 
-
+    @timeout(1)
     # @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
     def test_custom_eval(self):
         """ Test output interface of CustomEval """
