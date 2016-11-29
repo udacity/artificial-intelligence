@@ -172,7 +172,7 @@ class Project1Test(unittest.TestCase):
         """ Test CustomPlayer.alphabeta """
 
         h, w = 7, 7
-        method = "minimax"
+        method = "alphabeta"
         value_table = [[0] * w for _ in range(h)]
         value_table[2][5] = 1
         value_table[0][4] = 2
