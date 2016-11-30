@@ -74,6 +74,9 @@ def timeout(time_limit):
             except QueueEmptyError:
                 raise TimeoutError("Test aborted due to timeout. Test was " +
                     "expected to finish in less than {} second(s).".format(time_limit))
+            finally:
+                if p and p.is_alive():
+                    p.terminate()
 
         return testWrapper
 
