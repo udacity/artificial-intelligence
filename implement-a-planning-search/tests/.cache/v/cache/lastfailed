@@ -1,0 +1,12 @@
+{
+  "test_my_planning_graph.py::TestPlanningGraphHeuristics::test_levelsum": true,
+  "test_my_planning_graph.py::TestPlanningGraphHeuristics::test_setlevel": true,
+  "test_my_planning_graph.py::TestPlanningGraphLevels::test_add_action_level": true,
+  "test_my_planning_graph.py::TestPlanningGraphLevels::test_add_literal_level": true,
+  "test_my_planning_graph.py::TestPlanningGraphMutex::test_competing_needs_mutex": true,
+  "test_my_planning_graph.py::TestPlanningGraphMutex::test_inconsistent_effects_mutex": true,
+  "test_my_planning_graph.py::TestPlanningGraphMutex::test_inconsistent_support_mutex": true,
+  "test_my_planning_graph.py::TestPlanningGraphMutex::test_interference_mutex": true,
+  "test_my_planning_graph.py::TestPlanningGraphMutex::test_negation_mutex": true,
+  "test_my_planning_graph.py::TestPlanningGraphMutex::test_serialize_mutex": true
+}
