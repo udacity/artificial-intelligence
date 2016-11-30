@@ -14,7 +14,9 @@ from collections import Counter
 from copy import deepcopy
 from copy import copy
 from functools import wraps
-from multiprocessing import Process, Queue, TimeoutError
+from Queue import Queue
+from threading import Thread
+from multiprocessing import TimeoutError
 from Queue import Empty as QueueEmptyError
 
 
@@ -45,9 +47,19 @@ def curr_time_millis():
     return 1000 * timeit.default_timer()
 
 
+def handler(obj, testcase, queue):
+    try:
+        queue.put((None, testcase(obj)))
+    except Exception as e:
+        queue.put((e, None))
+
+
 def timeout(time_limit):
     """
     Function decorator for unittest test cases to specify test case timeout.
+
+    It is not safe to access system resources (e.g., files) within test
+    cases wrapped by this timer.
     """
 
     def wrapUnitTest(testcase):
@@ -57,14 +69,9 @@ def timeout(time_limit):
 
             queue = Queue()
 
-            def handler(self):
-                try:
-                    queue.put((None, testcase(self)))
-                except Exception as e:
-                    queue.put((e, None))
-
             try:
-                p = Process(target=handler, args=(self,))
+                p = Thread(target=handler, args=(self, testcase, queue))
+                p.daemon=True
                 p.start()
                 err, res = queue.get(timeout=time_limit)
                 p.join()
@@ -74,9 +81,9 @@ def timeout(time_limit):
             except QueueEmptyError:
                 raise TimeoutError("Test aborted due to timeout. Test was " +
                     "expected to finish in less than {} second(s).".format(time_limit))
-            finally:
-                if p and p.is_alive():
-                    p.terminate()
+            # finally:
+            #     if p and p.is_alive():
+            #         p.terminate()
 
         return testWrapper
 
