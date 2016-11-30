@@ -6,7 +6,6 @@ interface, but cannot be automatically assessed for correctness.
 """
 import unittest
 import timeit
-import signal
 
 import isolation
 import game_agent
@@ -15,6 +14,8 @@ from collections import Counter
 from copy import deepcopy
 from copy import copy
 from functools import wraps
+from multiprocessing import Process, Queue, TimeoutError
+from Queue import Empty as QueueEmptyError
 
 
 WRONG_MOVE = "Your {} search returned an invalid move at search depth {}." + \
@@ -49,27 +50,30 @@ def timeout(time_limit):
     Function decorator for unittest test cases to specify test case timeout.
     """
 
-    class TimeoutException(Exception):
-        """ Subclass Exception to catch timer expiration during search """
-        pass
-
-    def handler(*args, **kwargs):
-        """ Generic handler to raise an exception when a timer expires """
-        raise TimeoutException("Test aborted due to timeout. Test was " +
-            "expected to finish in less than {} second(s).".format(time_limit))
-
     def wrapUnitTest(testcase):
 
         @wraps(testcase)
-        def testWrapper(self, *args, **kwargs):
+        def testWrapper(self):
 
-            signal.signal(signal.SIGALRM, handler)
-            signal.alarm(time_limit)
+            queue = Queue()
+
+            def handler(self):
+                try:
+                    queue.put((None, testcase(self)))
+                except Exception as e:
+                    queue.put((e, None))
 
             try:
-                return testcase(self, *args, **kwargs)
-            finally:
-                signal.alarm(0)
+                p = Process(target=handler, args=(self,))
+                p.start()
+                err, res = queue.get(timeout=time_limit)
+                p.join()
+                if err:
+                    raise err
+                return res
+            except QueueEmptyError:
+                raise TimeoutError("Test aborted due to timeout. Test was " +
+                    "expected to finish in less than {} second(s).".format(time_limit))
 
         return testWrapper
 
