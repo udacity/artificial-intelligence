@@ -6,6 +6,7 @@ interface, but cannot be automatically assessed for correctness.
 """
 import unittest
 import timeit
+import sys
 
 import isolation
 import game_agent
@@ -50,8 +51,8 @@ def curr_time_millis():
 def handler(obj, testcase, queue):
     try:
         queue.put((None, testcase(obj)))
-    except Exception as e:
-        queue.put((e, None))
+    except:
+        queue.put((sys.exc_info(), None))
 
 
 def timeout(time_limit):
@@ -76,14 +77,11 @@ def timeout(time_limit):
                 err, res = queue.get(timeout=time_limit)
                 p.join()
                 if err:
-                    raise err
+                    raise err[0], err[1], err[2]
                 return res
             except QueueEmptyError:
                 raise TimeoutError("Test aborted due to timeout. Test was " +
                     "expected to finish in less than {} second(s).".format(time_limit))
-            # finally:
-            #     if p and p.is_alive():
-            #         p.terminate()
 
         return testWrapper
 
