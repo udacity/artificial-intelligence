@@ -21,25 +21,32 @@ from multiprocessing import TimeoutError
 from Queue import Empty as QueueEmptyError
 
 
-WRONG_MOVE = "Your {} search returned an invalid move at search depth {}." + \
-             "\nValid choices: {}\nYour selection: {}"
+WRONG_MOVE = """
+Your {} search returned an invalid move at search depth {}.
+Valid choices: {}
+Your selection: {}
+"""
 
-WRONG_NUM_EXPLORED = "Your {} search visited the wrong nodes at search " + \
-                     "depth {}.  If the number of visits is too large, " + \
-                     "make sure that iterative deepening is only running " + \
-                     "when the `iterative` flag is set in the agent " + \
-                     "constructor.\nMax explored size: {}\nNumber you " + \
-                     "explored: {}"
+WRONG_NUM_EXPLORED = """
+Your {} search visited the wrong nodes at search depth {}.  If the number of
+visits is too large, make sure that iterative deepening is only running when
+the `iterative` flag is set in the agent constructor.
+Max explored size: {}
+Number you explored: {}
+"""
 
-UNEXPECTED_VISIT = "Your {} search did not visit the number of expected " + \
-                   "unique nodes at search depth {}.\nMax explored size: " + \
-                   "{}\nNumber you explored: {}"
+UNEXPECTED_VISIT = """
+Your {} search did not visit the number of expected unique nodes at search
+depth {}.
+Max explored size: {}
+Number you explored: {}
+"""
 
-ID_ERROR = "Your ID search returned the wrong move at a depth of {} with " + \
-           "a {}ms time limit. {} {} {}"
-
-ID_FAIL = "Your agent did not explore enough nodes during the search; it " + \
-          "did not finish the first layer of available moves."
+ID_FAIL = """
+Your agent explored the wrong number of nodes using Iterative Deepening and
+minimax. Remember that ID + MM should check every node in each layer of the
+game tree before moving on to the next layer.
+"""
 
 TIMER_MARGIN = 15  # time (in ms) to leave on the timer to avoid timeout
 
@@ -72,7 +79,7 @@ def timeout(time_limit):
 
             try:
                 p = Thread(target=handler, args=(self, testcase, queue))
-                p.daemon=True
+                p.daemon = True
                 p.start()
                 err, res = queue.get(timeout=time_limit)
                 p.join()
@@ -96,6 +103,23 @@ class EvalTable():
     def score(self, game, player):
         row, col = game.get_player_location(player)
         return self.table[row][col]
+
+
+class EvalStop():
+
+    def __init__(self, limit, value=None):
+        self.limit = limit
+        self.dv = value
+        self.timer = None
+
+    def score(self, game, player):
+        # print self.limit
+        if self.limit == game.counts[0]:
+            self.dv.val = 0
+        elif self.timer() < 0:
+            raise TimeoutError("Timer expired during search. You must " + \
+                            "return an answer before the timer reaches 0.")
+        return 0
 
 
 class CounterBoard(isolation.Board):
@@ -257,53 +281,32 @@ class Project1Test(unittest.TestCase):
     def test_id(self):
         """ Test iterative deepening for CustomPlayer.minimax """
 
+        class DVal():
+
+            def __init__(self, val):
+                self.val = val
+
         w, h = 11, 11
         method = "minimax"
         value_table = [[0] * w for _ in range(h)]
-        value_table[3][0] = 1
-        value_table[2][3] = 1
-        value_table[4][4] = 2
-        value_table[7][2] = 3
-        eval_fn = EvalTable(value_table)
 
-        depths = ["7+", "6", "5", "4", "3", "2", "1"]
-        exact_counts = [((4, 4), set([(2, 3), (3, 0)])),
-                        ((16, 6), set([(2, 3), (3, 0)])),
-                        ((68, 20), set([(2, 3), (3, 2)])),
-                        ((310, 21), set([(2, 3), (3, 2)])),
-                        ((1582, 45), set([(3, 0), (3, 2)])),
-                        ((7534, 45), set([(3, 0), (3, 2)])),
-                        ((38366, 74), set([(0, 3), (2, 3), (3, 0), (3, 2)]))]
+        origins = [(2, 3), (6, 6), (7, 4), (4, 2), (0, 5), (10, 10)]
+        exact_counts = [(8, 8), (32, 10), (160, 39), (603, 35), (1861, 54), (3912, 62)]
 
-        time_limit = 3200
-        while time_limit >= TIMER_MARGIN:
-            agentUT, board = self.initAUT(-1, eval_fn, True, method, (1, 1), (0, 0), w, h)
+        for idx in range(len(origins)):
+            time_limit = DVal(1000)
+
+            eval_fn = EvalStop(exact_counts[idx][0]-1, time_limit)
+            agentUT, board = self.initAUT(-1, eval_fn, True, method, origins[idx], (0, 0), w, h)
 
             legal_moves = board.get_legal_moves()
             timer_start = curr_time_millis()
-            time_left = lambda : time_limit - (curr_time_millis() - timer_start)
-            move = agentUT.get_move(board, legal_moves, time_left)
-            finish_time = time_left()
+            time_left = lambda : time_limit.val - (curr_time_millis() - timer_start)
+            eval_fn.timer = time_left
+            agentUT.get_move(board, legal_moves, time_left)
 
-            self.assertTrue(len(board.visited) > 4, ID_FAIL)
+            self.assertEqual(board.counts, exact_counts[idx], ID_FAIL)
 
-            self.assertTrue(finish_time > 0,
-                "Your search failed iterative deepening due to timeout.")
-
-            # print time_limit, board.counts, move
-
-            time_limit /= 2
-            # Skip testing if the search exceeded 7 move horizon
-            if (board.counts[0] > exact_counts[-1][0][0] or
-                    board.counts[1] > exact_counts[-1][0][1] or
-                    finish_time < 5):
-                continue
-
-            for idx, ((n, m), c) in enumerate(exact_counts[::-1]):
-                if n > board.counts[0]:
-                    continue
-                self.assertIn(move, c, ID_ERROR.format(depths[idx], 2 * time_limit, move, *board.counts))
-                break
 
     @timeout(1)
     # @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
