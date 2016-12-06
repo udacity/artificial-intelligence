@@ -48,6 +48,13 @@ minimax. Remember that ID + MM should check every node in each layer of the
 game tree before moving on to the next layer.
 """
 
+INVALID_MOVE = """
+Your agent returned an invalid move. Make sure that your function returns
+a selection when the search times out during iterative deepening.
+Valid choices: {!s}
+Your choice: {}
+"""
+
 TIMER_MARGIN = 15  # time (in ms) to leave on the timer to avoid timeout
 
 
@@ -303,9 +310,12 @@ class Project1Test(unittest.TestCase):
             timer_start = curr_time_millis()
             time_left = lambda : time_limit.val - (curr_time_millis() - timer_start)
             eval_fn.timer = time_left
-            agentUT.get_move(board, legal_moves, time_left)
+            chosen_move = agentUT.get_move(board, legal_moves, time_left)
 
             self.assertEqual(board.counts, exact_counts[idx], ID_FAIL)
+
+            self.assertTrue(chosen_move in legal_moves,
+                INVALID_MOVE.format(legal_moves, chosen_move))
 
 
     @timeout(1)
