@@ -17,7 +17,7 @@ def game_as_text(winner, move_history, termination="", board=Board(1, 2)):
     """
     Generate a printable representation for a game of isolation.
 
-    Args:
+    Parameters
     ----------
     winner : hashable
         One of the objects registered by the board object as a valid player.
@@ -39,7 +39,7 @@ def game_as_text(winner, move_history, termination="", board=Board(1, 2)):
         An instance of `isolation.Board` encoding the game state (e.g., player
         locations and blocked cells) for a game of isolation.
 
-    Returns:
+    Returns
     ----------
     str
         A string representation of a game of isolation.

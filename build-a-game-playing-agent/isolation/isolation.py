@@ -22,7 +22,7 @@ class Board(object):
     Implement a model for the game Isolation assuming each player moves like
     a knight in chess.
 
-    Args:
+    Parameters
     ----------
     player_1 : object
         An object with a get_move() function. This is the only function
@@ -73,14 +73,14 @@ class Board(object):
         """
         Return the opponent of the supplied player.
 
-        Args:
+        Parameters
         ----------
         player : object
             An object registered as a player in the current game. Raises an
             error if the supplied object is not registered as a player in
             this game.
 
-        Returns:
+        Returns
         ----------
         object
             The opponent of the input player object.
@@ -107,13 +107,13 @@ class Board(object):
         Return a deep copy of the current game with an input move applied to
         advance the game one ply.
 
-        Args:
+        Parameters
         ----------
         move : (int, int)
             A coordinate pair (row, column) indicating the next position for
             the active player on the board.
 
-        Returns:
+        Returns
         ----------
         `isolation.Board`
             A deep copy of the board with the input move applied.
@@ -126,13 +126,13 @@ class Board(object):
         """
         Test whether a move is legal in the current game state.
 
-        Args:
+        Parameters
         ----------
         move : (int, int)
             A coordinate pair (row, column) indicating the next position for
             the active player on the board.
 
-        Returns:
+        Returns
         ----------
         bool
             Returns True if the move is legal, False otherwise
@@ -153,12 +153,12 @@ class Board(object):
         """
         Find the current location of the specified player on the board.
 
-        Args:
+        Parameters
         ----------
         player : object
             An object registered as a player in the current game.
 
-        Returns:
+        Returns
         ----------
         (int, int)
             The coordinate pair (row, column) of the input player.
@@ -169,13 +169,13 @@ class Board(object):
         """
         Return the list of all legal moves for the specified player.
 
-        Args:
+        Parameters
         ----------
         player : object (optional)
             An object registered as a player in the current game. If None,
             return the legal moves for the active player on the board.
 
-        Returns:
+        Returns
         ----------
         list<(int, int)>
             The list of coordinate pairs (row, column) of all legal moves
@@ -189,13 +189,13 @@ class Board(object):
         """
         Move the active player to a specified location.
 
-        Args:
+        Parameters
         ----------
         move : (int, int)
             A coordinate pair (row, column) indicating the next position for
             the active player on the board.
 
-        Returns:
+        Returns
         ----------
         None
         """
@@ -222,13 +222,13 @@ class Board(object):
         utility =  |   -infinity,   "player" loses
                     \          0,    otherwise
 
-        Args:
+        Parameters
         ----------
         player : object (optional)
             An object registered as a player in the current game. If None,
             return the utility for the active player on the board.
 
-        Returns:
+        Returns
         ----------
         float
             The utility value of the current game state for the specified
@@ -301,13 +301,13 @@ class Board(object):
         Execute a match between the players by alternately soliciting them
         to select a move and applying it in the game.
 
-        Args:
+        Parameters
         ----------
         time_limit : numeric (optional)
             The maximum number of milliseconds to allow before timeout
             during each turn.
 
-        Returns:
+        Returns
         ----------
         (player, list<[(int, int),]>, str)
             Return multiple including the winning player, the complete game

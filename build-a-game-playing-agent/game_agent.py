@@ -24,7 +24,7 @@ class CustomEval():
         Calculate the heuristic value of a game state from the point of view of
         the given player.
 
-        Args:
+        Parameters
         ----------
         game : `isolation.Board`
             An instance of `isolation.Board` encoding the current state of the
@@ -35,7 +35,7 @@ class CustomEval():
             (i.e., `player` should be either game.__player_1__ or
             game.__player_2__).
 
-        Returns:
+        Returns
         ----------
         float
             The heuristic value of the current game state.
@@ -52,7 +52,7 @@ class CustomPlayer():
     and test this player to make sure it properly uses minimax and alpha-beta
     to return a good move before the search time limit expires.
 
-    Args:
+    Parameters
     ----------
     search_depth : int (optional)
         A strictly positive integer (i.e., 1, 2, 3,...) for the number of
@@ -98,7 +98,7 @@ class CustomPlayer():
               timer reaches 0.
         **********************************************************************
 
-        Args:
+        Parameters
         ----------
         game : `isolation.Board`
             An instance of `isolation.Board` encoding the current state of the
@@ -113,7 +113,7 @@ class CustomPlayer():
             current turn. Returning with any less than 0 ms remaining forfeits
             the game.
 
-        Returns:
+        Returns
         ----------
         (int, int)
             Board coordinates corresponding to a legal move; may return
@@ -155,7 +155,7 @@ class CustomPlayer():
               signature can be changed, as it is not used for testing.)
         **********************************************************************
 
-        Args:
+        Parameters
         ----------
         game : isolation.Board
             An instance of the Isolation game `Board` class representing the
@@ -169,7 +169,7 @@ class CustomPlayer():
             Flag indicating whether the current search depth corresponds to a
             maximizing layer (True) or a minimizing layer (False)
 
-        Returns:
+        Returns
         ----------
         float
             By default, the output at least returns the floating point value
@@ -198,7 +198,7 @@ class CustomPlayer():
               signature can be changed, as it is not used for testing.)
         **********************************************************************
 
-        Args:
+        Parameters
         ----------
         game : isolation.Board
             An instance of the Isolation game `Board` class representing the
@@ -218,7 +218,7 @@ class CustomPlayer():
             Flag indicating whether the current search depth corresponds to a
             maximizing layer (True) or a minimizing layer (False)
 
-        Returns:
+        Returns
         ----------
         float
             By default, the output at least returns the floating point value

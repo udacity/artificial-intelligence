@@ -17,7 +17,7 @@ class NullEval():
         Calculate the heuristic value of a game state from the point of view of
         the given player.
 
-        Args:
+        Parameters
         ----------
         game : `isolation.Board`
             An instance of `isolation.Board` encoding the current state of the
@@ -28,7 +28,7 @@ class NullEval():
             (i.e., `player` should be either game.__player_1__ or
             game.__player_2__).
 
-        Returns:
+        Returns
         ----------
         float
             The heuristic value of the current game state.
@@ -54,7 +54,7 @@ class OpenMoveEval():
         Calculate the heuristic value of a game state from the point of view of
         the given player.
 
-        Args:
+        Parameters
         ----------
         game : `isolation.Board`
             An instance of `isolation.Board` encoding the current state of the
@@ -65,7 +65,7 @@ class OpenMoveEval():
             (i.e., `player` should be either game.__player_1__ or
             game.__player_2__).
 
-        Returns:
+        Returns
         ----------
         float
             The heuristic value of the current game state
@@ -91,7 +91,7 @@ class ImprovedEval():
         Calculate the heuristic value of a game state from the point of view of
         the given player.
 
-        Args:
+        Parameters
         ----------
         game : `isolation.Board`
             An instance of `isolation.Board` encoding the current state of the
@@ -102,7 +102,7 @@ class ImprovedEval():
             (i.e., `player` should be either game.__player_1__ or
             game.__player_2__).
 
-        Returns:
+        Returns
         ----------
         float
             The heuristic value of the current game state
@@ -125,7 +125,7 @@ class RandomPlayer():
         """
         Randomly select a move from the available legal moves.
 
-        Args:
+        Parameters
         ----------
         game : `isolation.Board`
             An instance of `isolation.Board` encoding the current state of the
@@ -140,7 +140,7 @@ class RandomPlayer():
             current turn. Returning with any less than 0 ms remaining forfeits
             the game.
 
-        Returns:
+        Returns
         ----------
         (int, int)
             A randomly selected legal move; may return (-1, -1) if there are
@@ -166,7 +166,7 @@ class GreedyPlayer():
         Select the move from the available legal moves with the highest
         heuristic score.
 
-        Args:
+        Parameters
         ----------
         game : `isolation.Board`
             An instance of `isolation.Board` encoding the current state of the
@@ -181,7 +181,7 @@ class GreedyPlayer():
             current turn. Returning with any less than 0 ms remaining forfeits
             the game.
 
-        Returns:
+        Returns
         ----------
         (int, int)
             The move in the legal moves list with the highest heuristic score
@@ -208,7 +208,7 @@ class HumanPlayer():
               the call to `Board.play()`.
         **********************************************************************
 
-        Args:
+        Parameters
         ----------
         game : `isolation.Board`
             An instance of `isolation.Board` encoding the current state of the
@@ -223,7 +223,7 @@ class HumanPlayer():
             current turn. Returning with any less than 0 ms remaining forfeits
             the game.
 
-        Returns:
+        Returns
         ----------
         (int, int)
             The move in the legal moves list selected by the user through the
