@@ -43,6 +43,16 @@ TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "increase this margin to avoid timeouts during  " + \
                   "tournament play."
 
+DESCRIPTION = """
+This script evaluates the performance of the CustomEval heuristic function
+by calibrating against the strength rating of agents using other heuristic
+functions of known strength.  The `ID_Improved` agent provides a baseline
+by measuring the performance of a basic agent using Iterative Deepening
+and the "improved" heuristic (from lecture) on your hardware.  The
+`Student` agent then measures the performance of Iterative Deepening and
+the CustomEval heuristic against the same opponents.
+"""
+
 Agent = namedtuple("Agent", ["player", "name"])
 
 
@@ -152,6 +162,7 @@ def main():
     test_agents = [Agent(CustomPlayer(eval_fn=ImprovedEval(), **CUSTOM_ARGS), "ID_Improved"),
                    Agent(CustomPlayer(eval_fn=CustomEval(), **CUSTOM_ARGS), "Student")]
 
+    print DESCRIPTION
     for agentUT in test_agents:
         print ""
         print "*************************"
