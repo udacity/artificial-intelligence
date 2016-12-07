@@ -45,8 +45,8 @@ class NullEval():
 
 class OpenMoveEval():
     """
-    Evaluation function that outputs a score equal to the number of moves open
-    for your computer player on the board.
+    The basic evaluation function described in lecture that outputs a score
+    equal to the number of moves open for your computer player on the board.
     """
 
     def score(self, game, player):
@@ -81,8 +81,9 @@ class OpenMoveEval():
 
 class ImprovedEval():
     """
-    Evaluation function that outputs a score equal to the difference in the
-    number of moves available to the two players.
+    The "Improved" evaluation function discussed in lecture that outputs a
+    score equal to the difference in the number of moves available to the
+    two players.
     """
 
     def score(self, game, player):
