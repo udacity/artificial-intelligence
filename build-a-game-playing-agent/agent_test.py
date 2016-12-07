@@ -22,7 +22,7 @@ from Queue import Empty as QueueEmptyError
 
 
 WRONG_MOVE = """
-Your {} search returned an invalid move at search depth {}.
+The {} function failed because it returned a non-optimal move at search depth {}.
 Valid choices: {}
 Your selection: {}
 """
