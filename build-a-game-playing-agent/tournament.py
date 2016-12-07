@@ -148,7 +148,7 @@ def play_round(agents, ratings, num_matches):
 
 def main():
 
-    EVAL_FUNCS = [("Null", NullEval), ("Open", OpenMoveEval), ("Improved", ImprovedEval)]
+    HEURISTICS = [("Null", NullEval), ("Open", OpenMoveEval), ("Improved", ImprovedEval)]
     AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
     MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
@@ -156,17 +156,17 @@ def main():
                "AB_Null": 1510, "AB_Open": 1640, "AB_Improved": 1660,
                "Random": 1150, "ID_Improved": 1500, "Student": 1500}
 
-    mm_agents = [Agent(CustomPlayer(eval_fn=fn(), **MM_ARGS), "MM_" + name) for name, fn in EVAL_FUNCS]
-    ab_agents = [Agent(CustomPlayer(eval_fn=fn(), **AB_ARGS), "AB_" + name) for name, fn in EVAL_FUNCS]
+    mm_agents = [Agent(CustomPlayer(heuristic=h, **MM_ARGS), "MM_" + name) for name, h in HEURISTICS]
+    ab_agents = [Agent(CustomPlayer(heuristic=h, **AB_ARGS), "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
-    test_agents = [Agent(CustomPlayer(eval_fn=ImprovedEval(), **CUSTOM_ARGS), "ID_Improved"),
-                   Agent(CustomPlayer(eval_fn=CustomEval(), **CUSTOM_ARGS), "Student")]
+    test_agents = [Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
+                   Agent(CustomPlayer(heuristic=CustomEval, **CUSTOM_ARGS), "Student")]
 
     print DESCRIPTION
     for agentUT in test_agents:
         print ""
         print "*************************"
-        print "{:^25}".format("Evaluating " + agentUT.name)
+        print "{:^25}".format("Evaluating: " + agentUT.name)
         print "*************************"
 
         agents =  mm_agents + ab_agents + random_agents + [agentUT]

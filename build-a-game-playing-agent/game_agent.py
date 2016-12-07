@@ -60,9 +60,8 @@ class CustomPlayer():
         defined such that a depth of one (1) would only explore the immediate
         sucessors of the current state.
 
-    eval_fn : class (optional)
-        List of the legal moves available to the player with initiative to
-        move in the current game state (this player).
+    heuristic : class (optional)
+        The name of a class to use for heuristic evaluation of game states.
 
     iterative : boolean (optional)
         Flag indicating whether to perform fixed-depth search (False) or
@@ -72,12 +71,12 @@ class CustomPlayer():
         The name of the search method to use in get_move().
     """
 
-    def __init__(self, search_depth=3, eval_fn=CustomEval(), iterative=False, method='minimax'):
+    def __init__(self, search_depth=3, heuristic=CustomEval, iterative=False, method='minimax'):
         """
         You MAY modify this function, but the interface must remain compatible
         with the version provided.
         """
-        self.eval_fn = eval_fn
+        self.heuristic = heuristic()
         self.search_depth = search_depth
         self.iterative = iterative
         self.method = method
