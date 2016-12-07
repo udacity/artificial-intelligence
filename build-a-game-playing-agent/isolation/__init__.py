@@ -1,9 +1,10 @@
 """
-You can use this file as a starting point to write your own unit tests
-for this project. You are encouraged to discuss testing with your
-peers, but you MAY NOT share code directly. Your code is also tested
-by more rigorous test cases and different test agents by the graders
-upon submission -- those test cases will not be released.
+This library provides a Python implementation of the game Isolation.
+Isolation is a deterministic, two-player game of perfect information in
+which the players alternate turns moving between cells on a square grid
+(like a checkerboard).  Whenever either player occupies a cell, that
+location is blocked for the rest of the game. The first player with no
+legal moves loses, and the opponent is declared the winner.
 """
 
 import StringIO

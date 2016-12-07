@@ -1,11 +1,11 @@
 """
-This file contains the `Board` class, which implements the rules for the game
-Isolation as described in lecture, modified so that the players move like
-knights in chess rather than queens.
+This file contains the `Board` class, which implements the rules for the
+game Isolation as described in lecture, modified so that the players move
+like knights in chess rather than queens.
 
 You MAY use and modify this class, however ALL function signatures must
-remain compatible with the defaults provided, and none of your changes will be
-available to project reviewers.
+remain compatible with the defaults provided, and none of your changes will
+be available to project reviewers.
 """
 
 import timeit
@@ -56,14 +56,16 @@ class Board(object):
     @property
     def active_player(self):
         """
-        The object registered as the player holding initiative in the current game state.
+        The object registered as the player holding initiative in the
+        current game state.
         """
         return self.__active_player__
 
     @property
     def inactive_player(self):
         """
-        The object registered as the player in waiting for the current game state.
+        The object registered as the player in waiting for the current
+        game state.
         """
         return self.__inactive_player__
 
@@ -75,8 +77,8 @@ class Board(object):
         ----------
         player : object
             An object registered as a player in the current game. Raises an
-            error if the supplied object is not registered as a player in this
-            game.
+            error if the supplied object is not registered as a player in
+            this game.
 
         Returns:
         ----------
@@ -213,8 +215,8 @@ class Board(object):
 
     def utility(self, player):
         """
-        Returns the utility of the current game state from the perspective of
-        the specified player.
+        Returns the utility of the current game state from the perspective
+        of the specified player.
 
                     /  +infinity,   "player" wins
         utility =  |   -infinity,   "player" loses
@@ -231,7 +233,8 @@ class Board(object):
         float
             The utility value of the current game state for the specified
             player. The game has a utility of +inf if the player has won,
-            a value of -inf if the player has lost, and a value of 0 otherwise.
+            a value of -inf if the player has lost, and a value of 0
+            otherwise.
         """
 
         if not self.get_legal_moves(self.active_player):
@@ -295,21 +298,21 @@ class Board(object):
 
     def play(self, time_limit=TIME_LIMIT_MILLIS):
         """
-        Execute a match between the players by alternately soliciting them to
-        select a move and applying it in the game.
+        Execute a match between the players by alternately soliciting them
+        to select a move and applying it in the game.
 
         Args:
         ----------
         time_limit : numeric (optional)
-            The maximum number of milliseconds to allow before timeout during
-            each turn.
+            The maximum number of milliseconds to allow before timeout
+            during each turn.
 
         Returns:
         ----------
         (player, list<[(int, int),]>, str)
             Return multiple including the winning player, the complete game
-            move history, and a string indicating the reason for losing (e.g.,
-            timeout or invalid move).
+            move history, and a string indicating the reason for losing
+            (e.g., timeout or invalid move).
         """
         move_history = []
 
