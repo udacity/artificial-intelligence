@@ -15,10 +15,11 @@ from collections import Counter
 from copy import deepcopy
 from copy import copy
 from functools import wraps
-from Queue import Queue
+from queue import Queue
 from threading import Thread
 from multiprocessing import TimeoutError
-from Queue import Empty as QueueEmptyError
+from queue import Empty as QueueEmptyError
+from importlib import reload
 
 
 WRONG_MOVE = """
@@ -91,7 +92,7 @@ def timeout(time_limit):
                 err, res = queue.get(timeout=time_limit)
                 p.join()
                 if err:
-                    raise err[0], err[1], err[2]
+                    raise err[0](err[1]).with_traceback(err[2])
                 return res
             except QueueEmptyError:
                 raise TimeoutError("Test aborted due to timeout. Test was " +
@@ -102,31 +103,46 @@ def timeout(time_limit):
     return wrapUnitTest
 
 
-class EvalTable():
+def makeEvalTable(table):
 
-    def __init__(self, table):
-        self.table = table
+    class EvalTable():
 
-    def score(self, game, player):
-        row, col = game.get_player_location(player)
-        return self.table[row][col]
+        def score(self, game, player):
+            row, col = game.get_player_location(player)
+            return table[row][col]
+
+    return EvalTable
 
 
-class EvalStop():
+# class EvalTable():
 
-    def __init__(self, limit, value=None):
-        self.limit = limit
-        self.dv = value
-        self.timer = None
+#     def __init__(self, table):
+#         self.table = table
 
-    def score(self, game, player):
-        # print self.limit
-        if self.limit == game.counts[0]:
-            self.dv.val = 0
-        elif self.timer() < 0:
-            raise TimeoutError("Timer expired during search. You must " + \
-                            "return an answer before the timer reaches 0.")
-        return 0
+#     def score(self, game, player):
+#         row, col = game.get_player_location(player)
+#         return self.table[row][col]
+
+
+def makeEvalStop(limit, timer, value=None):
+
+    class EvalStop():
+
+        def __init__(self, limit=limit, timer=timer, value=value):
+            self.limit = limit
+            self.dv = value
+            self.timer = timer
+
+        def score(self, game, player):
+            # print self.limit
+            if self.limit == game.counts[0]:
+                self.dv.val = 0
+            elif self.timer() < 0:
+                raise TimeoutError("Timer expired during search. You must " + \
+                                "return an answer before the timer reaches 0.")
+            return 0
+
+    return EvalStop
 
 
 class CounterBoard(isolation.Board):
@@ -185,7 +201,7 @@ class Project1Test(unittest.TestCase):
         value_table[1][5] = 1
         value_table[4][3] = 2
         value_table[6][6] = 3
-        eval_fn = EvalTable(value_table)
+        eval_fn = makeEvalTable(value_table)
 
         expected_moves = [set([(1, 5)]),
                           set([(3, 1), (3, 5)]),
@@ -221,7 +237,7 @@ class Project1Test(unittest.TestCase):
         value_table[0][4] = 2
         value_table[1][0] = 3
         value_table[5][5] = 4
-        eval_fn = EvalTable(value_table)
+        eval_fn = makeEvalTable(value_table)
 
         expected_moves = [set([(2, 5)]),
                           set([(2, 5)]),
@@ -256,7 +272,7 @@ class Project1Test(unittest.TestCase):
         method = "alphabeta"
         value_table = [[0] * w for _ in range(h)]
         value_table[3][14] = 1
-        eval_fn = EvalTable(value_table)
+        eval_fn = makeEvalTable(value_table)
         blocked_cells = [(0, 9), (0, 13), (0, 14), (1, 8), (1, 9), (1, 14),
                          (2, 9), (2, 11), (3, 8), (3, 10), (3, 11), (3, 12),
                          (4, 9), (4, 11), (4, 13), (5, 10), (5, 12), (5, 13),
@@ -303,13 +319,12 @@ class Project1Test(unittest.TestCase):
         for idx in range(len(origins)):
             time_limit = DVal(1000)
 
-            eval_fn = EvalStop(exact_counts[idx][0]-1, time_limit)
+            timer_start = curr_time_millis()
+            time_left = lambda : time_limit.val - (curr_time_millis() - timer_start)
+            eval_fn = makeEvalStop(exact_counts[idx][0]-1, time_left, time_limit)
             agentUT, board = self.initAUT(-1, eval_fn, True, method, origins[idx], (0, 0), w, h)
 
             legal_moves = board.get_legal_moves()
-            timer_start = curr_time_millis()
-            time_left = lambda : time_limit.val - (curr_time_millis() - timer_start)
-            eval_fn.timer = time_left
             chosen_move = agentUT.get_move(board, legal_moves, time_left)
 
             self.assertEqual(board.counts, exact_counts[idx], ID_FAIL)

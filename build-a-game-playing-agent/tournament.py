@@ -111,15 +111,15 @@ def play_round(agents, ratings, num_matches):
 
     agent_1 = agents[-1]
 
-    print "\nPlaying Matches:"
-    print "----------"
+    print("\nPlaying Matches:")
+    print("----------")
 
     for idx, agent_2 in enumerate(agents[:-1]):
 
         wins = {agent_1.player: 0., agent_2.player: 0.}
 
         names = [agent_1.name, agent_2.name]
-        print "  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names),
+        print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
 
         # Each player takes a turn going first
         for p1, p2 in itertools.permutations((agent_1.player, agent_2.player)):
@@ -136,8 +136,8 @@ def play_round(agents, ratings, num_matches):
 
         scores[agent_1.player] += wins[agent_1.player]
         scores[agent_2.player] += wins[agent_2.player]
-        print "\tResult: {} to {}".format(int(wins[agent_1.player]),
-                                          int(wins[agent_2.player]))
+        print("\tResult: {} to {}".format(int(wins[agent_1.player]),
+                                          int(wins[agent_2.player])))
 
     # Update the elo scores after all matches
     N = 2 * len(agents) * NUM_MATCHES
@@ -159,25 +159,25 @@ def main():
     mm_agents = [Agent(CustomPlayer(heuristic=h, **MM_ARGS), "MM_" + name) for name, h in HEURISTICS]
     ab_agents = [Agent(CustomPlayer(heuristic=h, **AB_ARGS), "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
-    test_agents = [Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
+    test_agents = [#Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
                    Agent(CustomPlayer(heuristic=CustomEval, **CUSTOM_ARGS), "Student")]
 
-    print DESCRIPTION
+    print(DESCRIPTION)
     for agentUT in test_agents:
-        print ""
-        print "*************************"
-        print "{:^25}".format("Evaluating: " + agentUT.name)
-        print "*************************"
+        print("")
+        print("*************************")
+        print("{:^25}".format("Evaluating: " + agentUT.name))
+        print("*************************")
 
         agents =  mm_agents + ab_agents + random_agents + [agentUT]
         ratings = play_round(agents, dict([(a.player, RATINGS[a.name]) for a in agents]), NUM_MATCHES)
 
         ranking = sorted([(a, ratings[a.player]) for a in agents], key=lambda x: x[1])
-        print "\n\nResults:"
-        print "----------"
-        print "{!s:<15}{!s:>10}".format("Name", "Rating")
-        print "{!s:<15}{!s:>10}".format("---", "---")
-        print "\n".join(["{!s:<15}{:>10.2f}".format(a.name, r) for a, r in ranking])
+        print("\n\nResults:")
+        print("----------")
+        print("{!s:<15}{!s:>10}".format("Name", "Rating"))
+        print("{!s:<15}{!s:>10}".format("---", "---"))
+        print("\n".join(["{!s:<15}{:>10.2f}".format(a.name, r) for a, r in ranking]))
 
 
 if __name__ == "__main__":

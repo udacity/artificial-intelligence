@@ -7,10 +7,10 @@ location is blocked for the rest of the game. The first player with no
 legal moves loses, and the opponent is declared the winner.
 """
 
-import StringIO
+import io
 
 # Make the Board class available at the root of the module for imports
-from isolation import Board
+from .isolation import Board
 
 
 def game_as_text(winner, move_history, termination="", board=Board(1, 2)):
@@ -45,7 +45,7 @@ def game_as_text(winner, move_history, termination="", board=Board(1, 2)):
         A string representation of a game of isolation.
     """
 
-    ans = StringIO.StringIO()
+    ans = io.StringIO()
 
     for i, move in enumerate(move_history):
         p1_move = move[0]

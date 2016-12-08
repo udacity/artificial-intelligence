@@ -233,12 +233,12 @@ class HumanPlayer():
         if not legal_moves:
             return (-1, -1)
 
-        print('\t'.join(['[%d] %s' % (i, str(move)) for i, move in enumerate(legal_moves)]))
+        print(('\t'.join(['[%d] %s' % (i, str(move)) for i, move in enumerate(legal_moves)])))
 
         valid_choice = False
         while not valid_choice:
             try:
-                index = int(raw_input('Select move index:'))
+                index = int(input('Select move index:'))
                 valid_choice = 0 <= index < len(legal_moves)
 
                 if not valid_choice:
