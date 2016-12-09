@@ -137,8 +137,7 @@ After implementation of the heuristics, run the heuristic-based A* search algori
    * Heuristics:
       * `h_pg_levelsum()`
       * `h_pg_setlevel()`
-* Test the implemented methods in `PlanningGraph` by running the unit tests provided in `test_my_planning_graph.py`.  From the command line this is `python -m unittest tests.test_my_planning_graph`
-   * run the tests via your IDE or execute from the terminal command line `python -m unittest tests.test_my_pddl`
+* Test the implemented methods in `PlanningGraph` by running the unit tests provided in `test_my_planning_graph.py`.  From the command l
 * Run A* planning searches using the three automated heuristics described above on each of the three problems.  Collect metrics on number of node expansions required, number of goal tests, time elapsed, and optimality of solution for each search algorithm for use in the written analysis.  
 * Test the Problem 3 solutions against the `acp3_pddl` definition created previously.
 * Submit the completed `my_planning_graph.py` module.
