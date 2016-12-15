@@ -303,7 +303,7 @@ class Project1Test(unittest.TestCase):
         for idx in range(len(origins)):
             time_limit = DVal(1000)
 
-            eval_fn = EvalStop(exact_counts[idx][0]-1, time_limit)
+            eval_fn = EvalStop(exact_counts[idx][0], time_limit)
             agentUT, board = self.initAUT(-1, eval_fn, True, method, origins[idx], (0, 0), w, h)
 
             legal_moves = board.get_legal_moves()
