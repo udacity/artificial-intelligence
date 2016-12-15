@@ -321,7 +321,7 @@ class Project1Test(unittest.TestCase):
 
             timer_start = curr_time_millis()
             time_left = lambda : time_limit.val - (curr_time_millis() - timer_start)
-            eval_fn = makeEvalStop(exact_counts[idx][0]-1, time_left, time_limit)
+            eval_fn = makeEvalStop(exact_counts[idx][0], time_left, time_limit)
             agentUT, board = self.initAUT(-1, eval_fn, True, method, origins[idx], (0, 0), w, h)
 
             legal_moves = board.get_legal_moves()
