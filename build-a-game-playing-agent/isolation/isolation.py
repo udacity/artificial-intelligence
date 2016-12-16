@@ -13,11 +13,10 @@ import timeit
 from copy import deepcopy
 from copy import copy
 
-
 TIME_LIMIT_MILLIS = 200
 
 
-class Board(object):
+class Board:
     """
     Implement a model for the game Isolation assuming each player moves like
     a knight in chess.
@@ -147,7 +146,7 @@ class Board(object):
         Return a list of the locations that are still available on the board.
         """
         return [(i, j) for j in range(self.width) for i in range(self.height)
-            if self.__board_state__[i][j] == Board.BLANK]
+                if self.__board_state__[i][j] == Board.BLANK]
 
     def get_player_location(self, player):
         """
@@ -259,9 +258,9 @@ class Board(object):
         r, c = move
 
         directions = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
-                      (1, -2),  (1, 2), (2, -1),  (2, 1)]
+                      (1, -2), (1, 2), (2, -1), (2, 1)]
 
-        valid_moves = [(r+dr,c+dc) for dr, dc in directions if self.move_is_legal((r+dr, c+dc))]
+        valid_moves = [(r + dr, c + dc) for dr, dc in directions if self.move_is_legal((r + dr, c + dc))]
 
         return valid_moves
 
@@ -325,7 +324,7 @@ class Board(object):
             game_copy = self.copy()
 
             move_start = curr_time_millis()
-            time_left = lambda : time_limit - (curr_time_millis() - move_start)
+            time_left = lambda: time_limit - (curr_time_millis() - move_start)
             curr_move = self.active_player.get_move(game_copy, legal_player_moves, time_left)
             move_end = time_left()
 

@@ -21,7 +21,6 @@ from multiprocessing import TimeoutError
 from queue import Empty as QueueEmptyError
 from importlib import reload
 
-
 WRONG_MOVE = """
 The {} function failed because it returned a non-optimal move at search depth {}.
 Valid choices: {}
@@ -66,7 +65,7 @@ def curr_time_millis():
 def handler(obj, testcase, queue):
     try:
         queue.put((None, testcase(obj)))
-    except:
+    except Exception:
         queue.put((sys.exc_info(), None))
 
 
@@ -96,7 +95,7 @@ def timeout(time_limit):
                 return res
             except QueueEmptyError:
                 raise TimeoutError("Test aborted due to timeout. Test was " +
-                    "expected to finish in less than {} second(s).".format(time_limit))
+                                   "expected to finish in less than {} second(s).".format(time_limit))
 
         return testWrapper
 
@@ -104,9 +103,7 @@ def timeout(time_limit):
 
 
 def makeEvalTable(table):
-
     class EvalTable():
-
         def score(self, game, player):
             row, col = game.get_player_location(player)
             return table[row][col]
@@ -125,8 +122,7 @@ def makeEvalTable(table):
 
 
 def makeEvalStop(limit, timer, value=None):
-
-    class EvalStop():
+    class EvalStop:
 
         def __init__(self, limit=limit, timer=timer, value=value):
             self.limit = limit
@@ -139,14 +135,13 @@ def makeEvalStop(limit, timer, value=None):
                 self.dv.val = 0
             elif self.timer() < 0:
                 raise TimeoutError("Timer expired during search. You must " + \
-                                "return an answer before the timer reaches 0.")
+                                   "return an answer before the timer reaches 0.")
             return 0
 
     return EvalStop
 
 
 class CounterBoard(isolation.Board):
-
     def __init__(self, *args, **kwargs):
         super(CounterBoard, self).__init__(*args, **kwargs)
         self.counter = Counter()
@@ -179,7 +174,6 @@ class CounterBoard(isolation.Board):
 
 
 class Project1Test(unittest.TestCase):
-
     def initAUT(self, depth, eval_fn, iterative=False, method="minimax", loc1=(3, 3), loc2=(0, 0), w=7, h=7):
 
         reload(game_agent)
@@ -203,9 +197,9 @@ class Project1Test(unittest.TestCase):
         value_table[6][6] = 3
         eval_fn = makeEvalTable(value_table)
 
-        expected_moves = [set([(1, 5)]),
-                          set([(3, 1), (3, 5)]),
-                          set([(3, 5), (4, 2)])]
+        expected_moves = [{(1, 5)},
+                          {(3, 1), (3, 5)},
+                          {(3, 5), (4, 2)}]
 
         counts = [(8, 8), (92, 27), (1650, 43)]
 
@@ -217,13 +211,13 @@ class Project1Test(unittest.TestCase):
             num_unique_valid = board.counts[1] == counts[idx][1]
 
             self.assertTrue(num_explored_valid,
-                WRONG_NUM_EXPLORED.format(method, depth, counts[idx][0], board.counts[0]))
+                            WRONG_NUM_EXPLORED.format(method, depth, counts[idx][0], board.counts[0]))
 
             self.assertTrue(num_unique_valid,
-                UNEXPECTED_VISIT.format(method, depth, counts[idx][1], board.counts[1]))
+                            UNEXPECTED_VISIT.format(method, depth, counts[idx][1], board.counts[1]))
 
             self.assertIn(move, expected_moves[idx],
-                WRONG_MOVE.format(method, depth, expected_moves[idx], move))
+                          WRONG_MOVE.format(method, depth, expected_moves[idx], move))
 
     @timeout(1)
     # @unittest.skip("Skip alpha-beta test.")  # Uncomment this line to skip test
@@ -239,10 +233,10 @@ class Project1Test(unittest.TestCase):
         value_table[5][5] = 4
         eval_fn = makeEvalTable(value_table)
 
-        expected_moves = [set([(2, 5)]),
-                          set([(2, 5)]),
-                          set([(1, 4)]),
-                          set([(1, 4), (2, 5)])]
+        expected_moves = [{(2, 5)},
+                          {(2, 5)},
+                          {(1, 4)},
+                          {(1, 4), (2, 5)}]
 
         counts = [(2, 2), (26, 13), (552, 36), (10564, 47)]
 
@@ -254,13 +248,13 @@ class Project1Test(unittest.TestCase):
             num_unique_valid = board.counts[1] <= counts[idx][1]
 
             self.assertTrue(num_explored_valid,
-                WRONG_NUM_EXPLORED.format(method, depth, counts[idx][0], board.counts[0]))
+                            WRONG_NUM_EXPLORED.format(method, depth, counts[idx][0], board.counts[0]))
 
             self.assertTrue(num_unique_valid,
-                UNEXPECTED_VISIT.format(method, depth, counts[idx][1], board.counts[1]))
+                            UNEXPECTED_VISIT.format(method, depth, counts[idx][1], board.counts[1]))
 
             self.assertIn(move, expected_moves[idx],
-                WRONG_MOVE.format(method, depth, expected_moves[idx], move))
+                          WRONG_MOVE.format(method, depth, expected_moves[idx], move))
 
     @timeout(1)
     # @unittest.skip("Skip alpha-beta pruning test.")  # Uncomment this line to skip test
@@ -291,27 +285,25 @@ class Project1Test(unittest.TestCase):
         num_unique_valid = board.counts[1] <= max_visits[1]
 
         self.assertTrue(num_explored_valid,
-            WRONG_NUM_EXPLORED.format(method, depth, max_visits[0], board.counts[0]))
+                        WRONG_NUM_EXPLORED.format(method, depth, max_visits[0], board.counts[0]))
 
         self.assertTrue(num_unique_valid,
-            UNEXPECTED_VISIT.format(method, depth, max_visits[1], board.counts[1]))
+                        UNEXPECTED_VISIT.format(method, depth, max_visits[1], board.counts[1]))
 
         self.assertEqual(move, expected_move,
-            WRONG_MOVE.format(method, depth, expected_move, move))
+                         WRONG_MOVE.format(method, depth, expected_move, move))
 
     @timeout(10)
     # @unittest.skip("Skip iterative deepening test.")  # Uncomment this line to skip test
     def test_id(self):
         """ Test iterative deepening for CustomPlayer.minimax """
 
-        class DVal():
-
+        class DVal:
             def __init__(self, val):
                 self.val = val
 
         w, h = 11, 11
         method = "minimax"
-        value_table = [[0] * w for _ in range(h)]
 
         origins = [(2, 3), (6, 6), (7, 4), (4, 2), (0, 5), (10, 10)]
         exact_counts = [(8, 8), (32, 10), (160, 39), (603, 35), (1861, 54), (3912, 62)]
@@ -320,7 +312,7 @@ class Project1Test(unittest.TestCase):
             time_limit = DVal(1000)
 
             timer_start = curr_time_millis()
-            time_left = lambda : time_limit.val - (curr_time_millis() - timer_start)
+            time_left = lambda: time_limit.val - (curr_time_millis() - timer_start)
             eval_fn = makeEvalStop(exact_counts[idx][0], time_left, time_limit)
             agentUT, board = self.initAUT(-1, eval_fn, True, method, origins[idx], (0, 0), w, h)
 
@@ -333,8 +325,7 @@ class Project1Test(unittest.TestCase):
             self.assertTrue(diff_total <= 1 and diff_unique == 0, ID_FAIL)
 
             self.assertTrue(chosen_move in legal_moves,
-                INVALID_MOVE.format(legal_moves, chosen_move))
-
+                            INVALID_MOVE.format(legal_moves, chosen_move))
 
     @timeout(1)
     # @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
@@ -348,7 +339,7 @@ class Project1Test(unittest.TestCase):
         heuristic = game_agent.CustomEval()
 
         self.assertIsInstance(heuristic.score(game, player1), float,
-            "The heuristic function should return a floating point")
+                              "The heuristic function should return a floating point")
 
 
 if __name__ == '__main__':
