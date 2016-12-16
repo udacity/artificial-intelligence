@@ -94,7 +94,7 @@ def timeout(time_limit):
                     raise err[0](err[1]).with_traceback(err[2])
                 return res
             except QueueEmptyError:
-                raise TimeoutError("Test aborted due to timeout. Test was " +
+                raise TimeoutError("Test aborted due to timeout. Test was "
                                    "expected to finish in less than {} second(s).".format(time_limit))
 
         return testWrapper
@@ -134,7 +134,7 @@ def makeEvalStop(limit, timer, value=None):
             if self.limit == game.counts[0]:
                 self.dv.val = 0
             elif self.timer() < 0:
-                raise TimeoutError("Timer expired during search. You must " + \
+                raise TimeoutError("Timer expired during search. You must "
                                    "return an answer before the timer reaches 0.")
             return 0
 
