@@ -49,14 +49,14 @@ def game_as_text(winner, move_history, termination="", board=Board(1, 2)):
 
     for i, move in enumerate(move_history):
         p1_move = move[0]
-        ans.write("%d." % i + " (%d,%d)\r\n" % p1_move)
+        ans.write("{0}. ({1}{1})\r\n".format(i, p1_move))
         if p1_move != Board.NOT_MOVED:
             board.apply_move(p1_move)
         ans.write(board.print_board())
 
         if len(move) > 1:
             p2_move = move[1]
-            ans.write("%d. ..." % i + " (%d, %d)\r\n" % p2_move)
+            ans.write("{0}. ... ({1}{1})\r\n".format(i, p2_move))
             if p2_move != Board.NOT_MOVED:
                 board.apply_move(p2_move)
             ans.write(board.print_board())

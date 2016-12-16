@@ -36,12 +36,12 @@ from game_agent import CustomEval
 NUM_MATCHES = 5  # play 5 matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
-TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
-                  "timeout. The get_move() function must return before " + \
-                  "time_left() reaches 0 ms. You will need to leave some " + \
-                  "time for the function to return, and may need to " + \
-                  "increase this margin to avoid timeouts during  " + \
-                  "tournament play."
+TIMEOUT_WARNING = ("One or more agents lost a match this round due to "
+                   "timeout. The get_move() function must return before "
+                   "time_left() reaches 0 ms. You will need to leave some "
+                   "time for the function to return, and may need to "
+                   "increase this margin to avoid timeouts during "
+                   "tournament play.")
 
 DESCRIPTION = """
 This script evaluates the performance of the CustomEval heuristic function
@@ -125,10 +125,9 @@ def play_round(agents, ratings, num_matches):
         for p1, p2 in itertools.permutations((agent_1.player, agent_2.player)):
 
             for _ in range(num_matches):
-
                 score_1, score_2 = play_match(p1, p2)
-                qa = float(10**(ratings[p1] / 400))
-                qb = float(10**(ratings[p2] / 400))
+                qa = float(10 ** (ratings[p1] / 400))
+                qb = float(10 ** (ratings[p2] / 400))
                 wins[p1] += score_1
                 wins[p2] += score_2
                 expectations[p1] += 2 * (qa / (qa + qb))
@@ -147,7 +146,6 @@ def play_round(agents, ratings, num_matches):
 
 
 def main():
-
     HEURISTICS = [("Null", NullEval), ("Open", OpenMoveEval), ("Improved", ImprovedEval)]
     AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
     MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
@@ -159,8 +157,8 @@ def main():
     mm_agents = [Agent(CustomPlayer(heuristic=h, **MM_ARGS), "MM_" + name) for name, h in HEURISTICS]
     ab_agents = [Agent(CustomPlayer(heuristic=h, **AB_ARGS), "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
-    test_agents = [#Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
-                   Agent(CustomPlayer(heuristic=CustomEval, **CUSTOM_ARGS), "Student")]
+    test_agents = [  # Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
+        Agent(CustomPlayer(heuristic=CustomEval, **CUSTOM_ARGS), "Student")]
 
     print(DESCRIPTION)
     for agentUT in test_agents:
@@ -169,7 +167,7 @@ def main():
         print("{:^25}".format("Evaluating: " + agentUT.name))
         print("*************************")
 
-        agents =  mm_agents + ab_agents + random_agents + [agentUT]
+        agents = mm_agents + ab_agents + random_agents + [agentUT]
         ratings = play_round(agents, dict([(a.player, RATINGS[a.name]) for a in agents]), NUM_MATCHES)
 
         ranking = sorted([(a, ratings[a.player]) for a in agents], key=lambda x: x[1])

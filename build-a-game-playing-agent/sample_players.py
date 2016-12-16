@@ -6,7 +6,7 @@ agent and example heuristic functions.
 from random import randint
 
 
-class NullEval():
+class NullEval:
     """
     This heuristic presumes no knowledge for non-terminal states, and returns
     the same uninformative value for all other states.
@@ -43,7 +43,7 @@ class NullEval():
         return 0.
 
 
-class OpenMoveEval():
+class OpenMoveEval:
     """
     The basic evaluation function described in lecture that outputs a score
     equal to the number of moves open for your computer player on the board.
@@ -79,7 +79,7 @@ class OpenMoveEval():
         return float(len(game.get_legal_moves(player)))
 
 
-class ImprovedEval():
+class ImprovedEval:
     """
     The "Improved" evaluation function discussed in lecture that outputs a
     score equal to the difference in the number of moves available to the
@@ -118,7 +118,7 @@ class ImprovedEval():
         return float(own_moves - opp_moves)
 
 
-class RandomPlayer():
+class RandomPlayer:
     """Player that chooses a move randomly."""
 
     def get_move(self, game, legal_moves, time_left):
@@ -152,7 +152,7 @@ class RandomPlayer():
         return legal_moves[randint(0, len(legal_moves) - 1)]
 
 
-class GreedyPlayer():
+class GreedyPlayer:
     """
     Player that chooses next move to maximize heuristic score. This is
     equivalent to a minimax search agent with a search depth of one.
@@ -195,7 +195,7 @@ class GreedyPlayer():
         return move
 
 
-class HumanPlayer():
+class HumanPlayer:
     """Player that chooses a move according to user's input."""
 
     def get_move(self, game, legal_moves, time_left):
@@ -233,7 +233,7 @@ class HumanPlayer():
         if not legal_moves:
             return (-1, -1)
 
-        print(('\t'.join(['[%d] %s' % (i, str(move)) for i, move in enumerate(legal_moves)])))
+        print(('\t'.join(['[{}] {}'.format(i, str(move)) for i, move in enumerate(legal_moves)])))
 
         valid_choice = False
         while not valid_choice:
@@ -243,8 +243,8 @@ class HumanPlayer():
 
                 if not valid_choice:
                     print('Illegal move! Try again.')
+                    continue
 
+                return legal_moves[index]
             except ValueError:
                 print('Invalid index! Try again.')
-
-        return legal_moves[index]

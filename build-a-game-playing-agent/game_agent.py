@@ -9,12 +9,13 @@ relative strength using run_tournament.py and include the results in your
 report.
 """
 
+
 class Timeout(Exception):
     """ Subclass base exception for code clarity. """
     pass
 
 
-class CustomEval():
+class CustomEval:
     """
     Custom evaluation function that acts however you think it should.
     """
@@ -45,7 +46,7 @@ class CustomEval():
         raise NotImplementedError
 
 
-class CustomPlayer():
+class CustomPlayer:
     """
     Game-playing agent that chooses a move using your evaluation function and a
     depth-limited minimax algorithm with alpha-beta pruning. You must finish
