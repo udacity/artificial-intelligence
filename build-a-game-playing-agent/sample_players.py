@@ -1,129 +1,106 @@
-"""
-This file contains a collection of player classes for comparison with your own
-agent and example heuristic functions.
+"""This file contains a collection of player classes for comparison with your
+own agent and example heuristic functions.
 """
 
 from random import randint
 
 
-class NullEval():
+def null_score(game, player):
+    """This heuristic presumes no knowledge for non-terminal states, and
+    returns the same uninformative value for all other states.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state.
     """
-    This heuristic presumes no knowledge for non-terminal states, and returns
-    the same uninformative value for all other states.
-    """
 
-    def score(self, game, player):
-        """
-        Calculate the heuristic value of a game state from the point of view of
-        the given player.
+    if game.is_loser(player):
+        return float("-inf")
 
-        Parameters
-        ----------
-        game : `isolation.Board`
-            An instance of `isolation.Board` encoding the current state of the
-            game (e.g., player locations and blocked cells).
+    if game.is_winner(player):
+        return float("inf")
 
-        player : hashable
-            One of the objects registered by the game object as a valid player.
-            (i.e., `player` should be either game.__player_1__ or
-            game.__player_2__).
-
-        Returns
-        ----------
-        float
-            The heuristic value of the current game state.
-        """
-
-        if game.is_loser(player):
-            return float("-inf")
-
-        if game.is_winner(player):
-            return float("inf")
-
-        return 0.
+    return 0.
 
 
-class OpenMoveEval():
-    """
-    The basic evaluation function described in lecture that outputs a score
+def open_move_score(game, player):
+    """The basic evaluation function described in lecture that outputs a score
     equal to the number of moves open for your computer player on the board.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
     """
+    if game.is_loser(player):
+        return float("-inf")
 
-    def score(self, game, player):
-        """
-        Calculate the heuristic value of a game state from the point of view of
-        the given player.
+    if game.is_winner(player):
+        return float("inf")
 
-        Parameters
-        ----------
-        game : `isolation.Board`
-            An instance of `isolation.Board` encoding the current state of the
-            game (e.g., player locations and blocked cells).
-
-        player : hashable
-            One of the objects registered by the game object as a valid player.
-            (i.e., `player` should be either game.__player_1__ or
-            game.__player_2__).
-
-        Returns
-        ----------
-        float
-            The heuristic value of the current game state
-        """
-        if game.is_loser(player):
-            return float("-inf")
-
-        if game.is_winner(player):
-            return float("inf")
-
-        return float(len(game.get_legal_moves(player)))
+    return float(len(game.get_legal_moves(player)))
 
 
-class ImprovedEval():
-    """
-    The "Improved" evaluation function discussed in lecture that outputs a
+def improved_score(game, player):
+    """The "Improved" evaluation function discussed in lecture that outputs a
     score equal to the difference in the number of moves available to the
     two players.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
     """
+    if game.is_loser(player):
+        return float("-inf")
 
-    def score(self, game, player):
-        """
-        Calculate the heuristic value of a game state from the point of view of
-        the given player.
+    if game.is_winner(player):
+        return float("inf")
 
-        Parameters
-        ----------
-        game : `isolation.Board`
-            An instance of `isolation.Board` encoding the current state of the
-            game (e.g., player locations and blocked cells).
-
-        player : hashable
-            One of the objects registered by the game object as a valid player.
-            (i.e., `player` should be either game.__player_1__ or
-            game.__player_2__).
-
-        Returns
-        ----------
-        float
-            The heuristic value of the current game state
-        """
-        if game.is_loser(player):
-            return float("-inf")
-
-        if game.is_winner(player):
-            return float("inf")
-
-        own_moves = len(game.get_legal_moves(player))
-        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-        return float(own_moves - opp_moves)
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - opp_moves)
 
 
 class RandomPlayer():
     """Player that chooses a move randomly."""
 
     def get_move(self, game, legal_moves, time_left):
-        """
-        Randomly select a move from the available legal moves.
+        """Randomly select a move from the available legal moves.
 
         Parameters
         ----------
@@ -153,17 +130,15 @@ class RandomPlayer():
 
 
 class GreedyPlayer():
-    """
-    Player that chooses next move to maximize heuristic score. This is
+    """Player that chooses next move to maximize heuristic score. This is
     equivalent to a minimax search agent with a search depth of one.
     """
 
-    def __init__(self, eval_fn=OpenMoveEval()):
-        self.eval_fn = eval_fn
+    def __init__(self, score_fn=open_move_score):
+        self.score = score_fn
 
     def get_move(self, game, legal_moves, time_left):
-        """
-        Select the move from the available legal moves with the highest
+        """Select the move from the available legal moves with the highest
         heuristic score.
 
         Parameters
@@ -191,7 +166,7 @@ class GreedyPlayer():
 
         if not legal_moves:
             return (-1, -1)
-        score, move = max([(game.forecast_move(m), m) for m in legal_moves])
+        _, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
         return move
 
 

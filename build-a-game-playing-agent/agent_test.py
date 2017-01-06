@@ -96,7 +96,7 @@ def timeout(time_limit):
                 return res
             except QueueEmptyError:
                 raise TimeoutError("Test aborted due to timeout. Test was " +
-                    "expected to finish in less than {} second(s).".format(time_limit))
+                                   "expected to finish in less than {} second(s).".format(time_limit))
 
         return testWrapper
 
@@ -105,44 +105,25 @@ def timeout(time_limit):
 
 def makeEvalTable(table):
 
-    class EvalTable():
+    def score(self, game, player):
+        row, col = game.get_player_location(player)
+        return table[row][col]
 
-        def score(self, game, player):
-            row, col = game.get_player_location(player)
-            return table[row][col]
-
-    return EvalTable
-
-
-# class EvalTable():
-
-#     def __init__(self, table):
-#         self.table = table
-
-#     def score(self, game, player):
-#         row, col = game.get_player_location(player)
-#         return self.table[row][col]
+    return score
 
 
 def makeEvalStop(limit, timer, value=None):
 
-    class EvalStop():
+    def score(self, game, player):
+        # print self.limit
+        if self.limit == game.counts[0]:
+            self.dv.val = 0
+        elif self.timer() < 0:
+            raise TimeoutError("Timer expired during search. You must " +
+                               "return an answer before the timer reaches 0.")
+        return 0
 
-        def __init__(self, limit=limit, timer=timer, value=value):
-            self.limit = limit
-            self.dv = value
-            self.timer = timer
-
-        def score(self, game, player):
-            # print self.limit
-            if self.limit == game.counts[0]:
-                self.dv.val = 0
-            elif self.timer() < 0:
-                raise TimeoutError("Timer expired during search. You must " + \
-                                "return an answer before the timer reaches 0.")
-            return 0
-
-    return EvalStop
+    return score
 
 
 class CounterBoard(isolation.Board):
