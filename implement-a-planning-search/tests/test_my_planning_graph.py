@@ -88,6 +88,21 @@ class TestPlanningGraphMutex(unittest.TestCase):
         mutexify(self.na1, self.na2)
         self.assertTrue(PlanningGraph.inconsistent_support_mutex(self.pg, self.ns1, self.ns2),"Mutex parent actions should result in inconsistent-support mutex")
 
+        self.na6 = PgNode_a(Action(expr('Go(everywhere)'), 
+            [[],[]],[[expr('At(here)'), expr('At(there)')],[]]))
+        self.na6.children.add(self.ns1)
+        self.ns1.parents.add(self.na6)
+        self.na6.children.add(self.ns2)
+        self.ns2.parents.add(self.na6)
+        self.na6.parents.add(self.ns3)
+        self.na6.parents.add(self.ns4)
+        mutexify(self.na1, self.na6)
+        mutexify(self.na2, self.na6)
+        self.assertFalse(PlanningGraph.inconsistent_support_mutex(
+            self.pg, self.ns1, self.ns2),
+            "If one parent action can achieve both states, should NOT be inconsistent-support mutex, even if parent actions are themselves mutex")
+
+
 class TestPlanningGraphHeuristics(unittest.TestCase):
     def setUp(self):
         self.p = have_cake()
