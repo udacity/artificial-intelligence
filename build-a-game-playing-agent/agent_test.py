@@ -234,7 +234,7 @@ class Project1Test(unittest.TestCase):
         player2 = "Player2"
         game = isolation.Board(player1, player2)
 
-        heuristic = game_agent.CustomPlayer().score
+        heuristic = game_agent.custom_score
 
         self.assertIsInstance(heuristic(game, player1), float,
             "The heuristic function should return a floating point")

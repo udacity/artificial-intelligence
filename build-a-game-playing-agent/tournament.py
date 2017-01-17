@@ -27,11 +27,11 @@ from collections import namedtuple
 
 from isolation import Board
 from sample_players import RandomPlayer
-from sample_players import NullEval
-from sample_players import OpenMoveEval
-from sample_players import ImprovedEval
+from sample_players import null_score
+from sample_players import open_move_score
+from sample_players import improved_score
 from game_agent import CustomPlayer
-from game_agent import CustomEval
+from game_agent import custom_score
 
 NUM_MATCHES = 5  # play 5 matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
@@ -149,7 +149,9 @@ def play_round(agents, ratings, num_matches):
 
 def main():
 
-    HEURISTICS = [("Null", NullEval), ("Open", OpenMoveEval), ("Improved", ImprovedEval)]
+    HEURISTICS = [("Null", null_score),
+                  ("Open", open_move_score),
+                  ("Improved", improved_score)]
     AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
     MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
@@ -158,9 +160,14 @@ def main():
                "Random": 1150, "ID_Improved": 1500, "Student": 1500}
 
     # Create a collection of CPU agents using fixed-depth minimax or alpha beta
-    # search, or random selection.  The agent names encode 
-    mm_agents = [Agent(CustomPlayer(heuristic=h, **MM_ARGS), "MM_" + name) for name, h in HEURISTICS]
-    ab_agents = [Agent(CustomPlayer(heuristic=h, **AB_ARGS), "AB_" + name) for name, h in HEURISTICS]
+    # search, or random selection.  The agent names encode the search method
+    # (MM=minimax, AB=alpha-beta) and the heuristic function (Null=null_score,
+    # Open=open_move_score, Improved=improved_score). For example, MM_Open is
+    # an agent using minimax search with the open moves heuristic.
+    mm_agents = [Agent(CustomPlayer(score_fn=h, **MM_ARGS),
+                       "MM_" + name) for name, h in HEURISTICS]
+    ab_agents = [Agent(CustomPlayer(score_fn=h, **AB_ARGS),
+                       "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
 
     # ID_Improved agent is used for comparison to the performance of the
@@ -168,8 +175,10 @@ def main():
     # systems; i.e., the performance of the student agent is considered
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
-    test_agents = [Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
-                   Agent(CustomPlayer(heuristic=CustomEval, **CUSTOM_ARGS), "Student")]
+    test_agents = [Agent(CustomPlayer(score_fn=improved_score,
+                                      **CUSTOM_ARGS), "ID_Improved"),
+                   Agent(CustomPlayer(score_fn=custom_score,
+                                      **CUSTOM_ARGS), "Student")]
 
     print(DESCRIPTION)
     for agentUT in test_agents:
@@ -178,10 +187,12 @@ def main():
         print("{:^25}".format("Evaluating: " + agentUT.name))
         print("*************************")
 
-        agents =  mm_agents + ab_agents + random_agents + [agentUT]
-        ratings = play_round(agents, dict([(a.player, RATINGS[a.name]) for a in agents]), NUM_MATCHES)
+        agents = random_agents + mm_agents + ab_agents + [agentUT]
+        players = dict([(a.player, RATINGS[a.name]) for a in agents])
+        ratings = play_round(agents, players, NUM_MATCHES)
 
-        ranking = sorted([(a, ratings[a.player]) for a in agents], key=lambda x: x[1])
+        ranking = sorted([(a, ratings[a.player]) for a in agents],
+                         key=lambda x: x[1])
         print("\n\nResults:")
         print("----------")
         print("{!s:<15}{!s:>10}".format("Name", "Rating"))

@@ -14,7 +14,7 @@ class Timeout(Exception):
     pass
 
 
-def score(game, player):
+def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -68,7 +68,8 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=score, iterative=True, method='minimax', timeout=10.):
+    def __init__(self, search_depth=3, score_fn=custom_score,
+                 iterative=True, method='minimax', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
