@@ -226,6 +226,114 @@ class Project1Test(unittest.TestCase):
         return agentUT, board
 
     @timeout(1)
+    # @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
+    def test_heuristic(self):
+        """ Test output interface of heuristic score function interface."""
+
+        player1 = "Player1"
+        player2 = "Player2"
+        game = isolation.Board(player1, player2)
+
+        heuristic = game_agent.CustomPlayer().score
+
+        self.assertIsInstance(heuristic(game, player1), float,
+            "The heuristic function should return a floating point")
+
+    timeout(1)
+    # @unittest.skip("Skip simple minimax test.")  # Uncomment this line to skip test
+    def test_minimax_interface(self):
+        """ Test CustomPlayer.minimax interface with simple input """
+        h, w = 7, 7  # board size
+        test_depth = 3
+        starting_location = (5, 3)
+        adversary_location = (0, 0)  # top left corner
+        iterative_search = False
+        search_method = "minimax"
+        heuristic = lambda g, p: 0.  # return 0 everywhere
+
+        # create a player agent & a game board
+        agentUT = game_agent.CustomPlayer(
+            test_depth, heuristic, iterative_search, search_method)
+        agentUT.time_left = lambda: 99  # ignore timeout for fixed-depth search
+        board = isolation.Board(agentUT, 'null_agent', w, h)
+
+        # place two "players" on the board at arbitrary (but fixed) locations
+        board.apply_move(starting_location)
+        board.apply_move(adversary_location)
+
+        for move in board.get_legal_moves():
+            next_state = board.forecast_move(move)
+            v = agentUT.minimax(next_state, test_depth - 1, False)
+
+            self.assertTrue(type(v) == float,
+                            ("Minimax function should return a floating " +
+                             "point value approximating the score for the " +
+                             "branch being searched."))
+
+    timeout(1)
+    # @unittest.skip("Skip alphabeta test.")  # Uncomment this line to skip test
+    def test_alphabeta_interface(self):
+        """ Test CustomPlayer.alphabeta interface with simple input """
+        h, w = 7, 7  # board size
+        test_depth = 3
+        starting_location = (2, 7)
+        adversary_location = (0, 0)  # top left corner
+        iterative_search = False
+        search_method = "alphabeta"
+        heuristic = lambda g, p: 0.  # return 0 everywhere
+
+        # create a player agent & a game board
+        agentUT = game_agent.CustomPlayer(
+            test_depth, heuristic, iterative_search, search_method)
+        agentUT.time_left = lambda: 99  # ignore timeout for fixed-depth search
+        board = isolation.Board(agentUT, 'null_agent', w, h)
+
+        # place two "players" on the board at arbitrary (but fixed) locations
+        board.apply_move(starting_location)
+        board.apply_move(adversary_location)
+
+        for move in board.get_legal_moves():
+            next_state = board.forecast_move(move)
+            v = agentUT.alphabeta(next_state, test_depth - 1,
+                                  float("-inf"), float("inf"), False)
+
+            self.assertTrue(type(v) == float,
+                            ("Alpha Beta function should return a floating " +
+                             "point value approximating the score for the " +
+                             "branch being searched."))
+
+    @timeout(1)
+    # @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
+    def test_get_move_interface(self):
+        """ Test CustomPlayer.get_move interface with simple input """
+        h, w = 7, 7  # board size
+        test_depth = 3
+        starting_location = (2, 7)
+        adversary_location = (0, 0)  # top left corner
+        iterative_search = False
+        search_method = "minimax"
+        heuristic = lambda g, p: 0.  # return 0 everywhere
+
+        # create a player agent & a game board
+        agentUT = game_agent.CustomPlayer(
+            test_depth, heuristic, iterative_search, search_method)
+        board = isolation.Board(agentUT, 'null_agent', w, h)
+
+        # place two "players" on the board at arbitrary (but fixed) locations
+        board.apply_move(starting_location)
+        board.apply_move(adversary_location)
+
+        # ignore the search timer for fixed-depth search by making the timer
+        # function always return a constant
+        legal_moves = board.get_legal_moves()
+        move = agentUT.get_move(board, legal_moves, lambda: 99)
+        self.assertIn(move, legal_moves,
+                      ("The get_move() function should return a tuple of " +
+                       "coordinates on the game board for the location " +
+                       "of the agent's next move. The move must be one " +
+                       "of the legal moves on the current game board."))
+
+    @timeout(1)
     # @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
     def test_minimax(self):
         """ Test CustomPlayer.minimax
@@ -412,20 +520,6 @@ class Project1Test(unittest.TestCase):
 
             self.assertTrue(chosen_move in legal_moves, INVALID_MOVE.format(
                 legal_moves, chosen_move))
-
-    @timeout(1)
-    # @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
-    def test_heuristic(self):
-        """ Test output interface of heuristic score function interface."""
-
-        player1 = "Player1"
-        player2 = "Player2"
-        game = isolation.Board(player1, player2)
-
-        heuristic = game_agent.CustomPlayer().score
-
-        self.assertIsInstance(heuristic(game, player1), float,
-            "The heuristic function should return a floating point")
 
 
 if __name__ == '__main__':
