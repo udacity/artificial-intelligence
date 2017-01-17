@@ -6,6 +6,7 @@ augment the test suite with your own test cases to further test your code.
 You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
+import random
 
 
 class Timeout(Exception):
@@ -67,7 +68,7 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=score, iterative=False, method='minimax', timeout=10.):
+    def __init__(self, search_depth=3, score_fn=score, iterative=True, method='minimax', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -115,10 +116,10 @@ class CustomPlayer:
 
         # TODO: finish this function!
 
-        # Perform any required initializations
+        # Perform any required initializations, including selecting an initial
+        # move from the game board (i.e., an opening book)
 
         try:
-
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
@@ -126,12 +127,10 @@ class CustomPlayer:
             pass
 
         except Timeout:
-
             # Handle any actions required at timeout, if necessary
             pass
 
         # Return the best move from the last completed search iteration
-
         raise NotImplementedError
 
     def minimax(self, game, depth, maximizing_player=True):
@@ -154,7 +153,7 @@ class CustomPlayer:
         Returns
         ----------
         float
-            The score of this branch to propagate up through the game tree
+            The score for the current search branch
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
@@ -189,7 +188,7 @@ class CustomPlayer:
         Returns
         ----------
         float
-            The score of this branch to propagate up through the game tree
+            The score for the current search branch
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
