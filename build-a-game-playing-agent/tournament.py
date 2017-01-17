@@ -44,13 +44,14 @@ TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "tournament play."
 
 DESCRIPTION = """
-This script evaluates the performance of the CustomEval heuristic function
-by calibrating against the strength rating of agents using other heuristic
-functions of known strength.  The `ID_Improved` agent provides a baseline
-by measuring the performance of a basic agent using Iterative Deepening
-and the "improved" heuristic (from lecture) on your hardware.  The
-`Student` agent then measures the performance of Iterative Deepening and
-the CustomEval heuristic against the same opponents.
+This script evaluates the performance of the custom heuristic function by
+comparing the strength of an agent using iterative deepening (ID) search with
+alpha-beta pruning against the strength rating of agents using other heuristic
+functions.  The `ID_Improved` agent provides a baseline by measuring the
+performance of a basic agent using Iterative Deepening and the "improved"
+heuristic (from lecture) on your hardware.  The `Student` agent then measures
+the performance of Iterative Deepening and the custom heuristic against the
+same opponents.
 """
 
 Agent = namedtuple("Agent", ["player", "name"])
@@ -156,9 +157,17 @@ def main():
                "AB_Null": 1510, "AB_Open": 1640, "AB_Improved": 1660,
                "Random": 1150, "ID_Improved": 1500, "Student": 1500}
 
+    # Create a collection of CPU agents using fixed-depth minimax or alpha beta
+    # search, or random selection.  The agent names encode 
     mm_agents = [Agent(CustomPlayer(heuristic=h, **MM_ARGS), "MM_" + name) for name, h in HEURISTICS]
     ab_agents = [Agent(CustomPlayer(heuristic=h, **AB_ARGS), "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
+
+    # ID_Improved agent is used for comparison to the performance of the
+    # submitted agent for calibration on the performance across different
+    # systems; i.e., the performance of the student agent is considered
+    # relative to the performance of the ID_Improved agent to account for
+    # faster or slower computers.
     test_agents = [Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
                    Agent(CustomPlayer(heuristic=CustomEval, **CUSTOM_ARGS), "Student")]
 
