@@ -413,10 +413,6 @@ class PlanningGraph():
         the precondition of one action is mutex with a precondition of the
         other action.
 
-        HINT: The Action instance associated with an action node is accessible
-        through the PgNode_a.action attribute. See the Action class
-        documentation for details on accessing the preconditions of an action.
-
         :param node_a1: PgNode_a
         :param node_a2: PgNode_a
         :return: bool
