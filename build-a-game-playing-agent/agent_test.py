@@ -274,7 +274,7 @@ class Project1Test(unittest.TestCase):
     # @unittest.skip("Skip alphabeta test.")  # Uncomment this line to skip test
     def test_alphabeta_interface(self):
         """ Test CustomPlayer.alphabeta interface with simple input """
-        h, w = 7, 7  # board size
+        h, w = 9, 9  # board size
         test_depth = 3
         starting_location = (2, 7)
         adversary_location = (0, 0)  # top left corner
@@ -306,7 +306,7 @@ class Project1Test(unittest.TestCase):
     # @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
     def test_get_move_interface(self):
         """ Test CustomPlayer.get_move interface with simple input """
-        h, w = 7, 7  # board size
+        h, w = 9, 9  # board size
         test_depth = 3
         starting_location = (2, 7)
         adversary_location = (0, 0)  # top left corner
