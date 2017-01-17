@@ -375,15 +375,13 @@ class PlanningGraph():
 
     def inconsistent_effects_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a)->bool:
         '''
-        Test a pair of state literals for mutual exclusion, returning True if
-        there are no actions that could achieve the two literals at the same
-        time, and False otherwise.  In other words, the two literal nodes are
-        mutex if all of the actions that could achieve the first literal node
-        are pairwise mutually exclusive with all of the actions that could
-        achieve the second literal node.
+        Test a pair of actions for inconsistent effects, returning True if
+        one action negates an effect of the other, and False otherwise.
 
-        HINT: The PgNode.is_mutex method can be used to test whether two nodes
-        are mutually exclusive.
+        HINT: The Action instance associated with an action node is accessible
+        through the PgNode_a.action attribute. See the Action class
+        documentation for details on accessing the effects and preconditions of
+        an action.
 
         :param node_a1: PgNode_a
         :param node_a2: PgNode_a

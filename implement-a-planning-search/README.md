@@ -84,7 +84,7 @@ For each of the problems above, write out the PDDL planning language representat
 * Submit the completed module `my_pddl.py`
 
 ### Part 2: Uninformed search for Planning - `my_air_cargo_problems.py`
-In order to take advantage of the various search search algorithms already provided in the `aimacode.search` module, subclass the `PlanningProblem` class provided in `helpers.planning_problem` as a generic `AirCargoProblem` for the domain.  This has been started for you in my_air_cargo_problems.py.  You will complete the domain methods.  Next, create AirCargoProblem instances for Problem 1, Problem 2, and Problem 3 by defining the instance variables, inital state, and goal test.  Once the problem instances are defined, they can be run with the planning searches.  A definition for the Problem 1 instance has been provided for you (`air_cargo_p1`) as an example.  Follow this pattern to implement Problem 2 and Problem 3 instances.  
+In order to take advantage of the various search search algorithms already provided in the `aimacode.search` module, subclass the `PlanningProblem` class provided in `helpers.planning_problem` as a generic `AirCargoProblem` for the domain.  This has been started for you in `my_air_cargo_problems.py`.  You will complete the domain methods.  Next, create `AirCargoProblem` instances for Problem 1, Problem 2, and Problem 3 by defining the instance variables, inital state, and goal test.  Once the problem instances are defined, they can be run with the planning searches.  A definition for the Problem 1 instance has been provided for you (`air_cargo_p1`) as an example.  Follow this pattern to implement Problem 2 and Problem 3 instances.  
 
 Note that for the planning problem searches to work correctly, states will have to be defined, which means that all fluents must be ground, functionless atoms. Some helper classes are provided for encoding and decoding the states so they will work properly with the `aimacode.search` module code.  An example of a defined problem with several planning searches is provided for the "Have Cake and Eat it" problem in `example_have_cake.py`.
 
@@ -95,12 +95,13 @@ Note that for the planning problem searches to work correctly, states will have 
    * `result()`
 * Implement the problem instance definitions for Problem 2 and Problem 3 in `my_air_cargo_problems.py` (Problem 1 is implemented as an example)
    * `air_cargo_p2()`
-   * `air_cargo_p3()` 
+   * `air_cargo_p3()`
+* During implementation of the methods and instance definitions, make use of the unit tests provided to check your work.  They can be executed from the command line with `python -m unittest tests.test_my_air_cargo_problems`
 * Run uninformed planning searches for `air_cargo_p1` and `air_cargo_p2` and provide metrics on number of node expansions required, number of goal tests, time elapsed, and optimality of solution for each search algorithm. Include the result of at least three of these searches for Problem 1 and Problem 2, including breadth-first and depth-first, in your write-up. 
-* Implement tests for the solutions against the `acp2_pddl` and `acp3_pddl` definitions created previously by implementing `test_my_pddl.py` methods:
+* Take a step back and implement unit tests for the solutions you just found against the `acp2_pddl` and `acp3_pddl` definitions created previously by implementing `test_my_pddl.py` methods:
    * `test_acp2()`
    * `test_acp3()`
-   * To run the tests, execute from the terminal command line `python -m unittest tests.test_my_pddl`   
+   * To run the PDDL solution tests, execute from the terminal command line `python -m unittest tests.test_my_pddl`   
 * Note that it is not required to run the uninformed searches for Problem 3 for submission as it may take a very long time, (but feel free to do so!).
 * Submit the completed module `my_air_cargo_problems.py` module.
 
@@ -134,10 +135,9 @@ After implementation of the heuristics, run the heuristic-based A* search algori
       * `negation_mutex()`
       * `inconsistent_support_mutex()`
    * Heuristics:
-      * `h_pg_levelsum()`
-      * `h_pg_setlevel()`
-* Test the implemented methods in `PlanningGraph` by running the unit tests provided in `test_my_planning_graph.py`
-   * run the tests via your IDE or execute from the terminal command line `python -m unittest tests.test_my_pddl`
+      * `h_levelsum()`
+      * `h_setlevel()`
+* Test the implemented methods in `PlanningGraph` by running the unit tests provided in `test_my_planning_graph.py`.  From the command line enter `python -m unittest tests.test_my_planning_graph`
 * Run A* planning searches using the three automated heuristics described above on each of the three problems.  Collect metrics on number of node expansions required, number of goal tests, time elapsed, and optimality of solution for each search algorithm for use in the written analysis.  
 * Test the Problem 3 solutions against the `acp3_pddl` definition created previously.
 * Submit the completed `my_planning_graph.py` module.

@@ -159,7 +159,7 @@ def main():
     mm_agents = [Agent(CustomPlayer(heuristic=h, **MM_ARGS), "MM_" + name) for name, h in HEURISTICS]
     ab_agents = [Agent(CustomPlayer(heuristic=h, **AB_ARGS), "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
-    test_agents = [#Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
+    test_agents = [Agent(CustomPlayer(heuristic=ImprovedEval, **CUSTOM_ARGS), "ID_Improved"),
                    Agent(CustomPlayer(heuristic=CustomEval, **CUSTOM_ARGS), "Student")]
 
     print(DESCRIPTION)
