@@ -118,7 +118,8 @@ class CustomPlayer:
         # TODO: finish this function!
 
         # Perform any required initializations, including selecting an initial
-        # move from the game board (i.e., an opening book)
+        # move from the game board (i.e., an opening book), or returning
+        # immediately if there are no legal moves
 
         try:
             # The search method call (alpha beta or minimax) should happen in
@@ -155,6 +156,9 @@ class CustomPlayer:
         ----------
         float
             The score for the current search branch
+
+        tuple(int, int)
+            The best move for the current branch; (-1, -1) for no legal moves
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
@@ -190,6 +194,9 @@ class CustomPlayer:
         ----------
         float
             The score for the current search branch
+
+        tuple(int, int)
+            The best move for the current branch; (-1, -1) for no legal moves
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()

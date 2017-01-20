@@ -33,7 +33,7 @@ from sample_players import improved_score
 from game_agent import CustomPlayer
 from game_agent import custom_score
 
-NUM_MATCHES = 5  # play 5 matches against each opponent
+NUM_MATCHES = 5  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
@@ -102,49 +102,37 @@ def play_match(player1, player2):
     return num_wins[player1], num_wins[player2]
 
 
-def play_round(agents, ratings, num_matches):
+def play_round(agents, num_matches):
     """
     Play one round (i.e., a single match between each pair of opponents)
     """
-
-    scores = dict([(a.player, 0) for a in agents])
-    expectations = dict([(a.player, 0) for a in agents])
-
     agent_1 = agents[-1]
+    wins = 0.
+    total = 0.
 
     print("\nPlaying Matches:")
     print("----------")
 
     for idx, agent_2 in enumerate(agents[:-1]):
 
-        wins = {agent_1.player: 0., agent_2.player: 0.}
-
+        counts = {agent_1.player: 0., agent_2.player: 0.}
         names = [agent_1.name, agent_2.name]
         print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
 
         # Each player takes a turn going first
         for p1, p2 in itertools.permutations((agent_1.player, agent_2.player)):
-
             for _ in range(num_matches):
-
                 score_1, score_2 = play_match(p1, p2)
-                qa = float(10**(ratings[p1] / 400))
-                qb = float(10**(ratings[p2] / 400))
-                wins[p1] += score_1
-                wins[p2] += score_2
-                expectations[p1] += 2 * (qa / (qa + qb))
-                expectations[p2] += 2 * (qb / (qa + qb))
+                counts[p1] += score_1
+                counts[p2] += score_2
+                total += score_1 + score_2
 
-        scores[agent_1.player] += wins[agent_1.player]
-        scores[agent_2.player] += wins[agent_2.player]
-        print("\tResult: {} to {}".format(int(wins[agent_1.player]),
-                                          int(wins[agent_2.player])))
+        wins += counts[agent_1.player]
 
-    # Update the elo scores after all matches
-    N = 2 * len(agents) * NUM_MATCHES
-    ratings[agent_1.player] += ((400. / N) * (scores[agent_1.player] - expectations[agent_1.player]))
+        print("\tResult: {} to {}".format(int(counts[agent_1.player]),
+                                          int(counts[agent_2.player])))
 
-    return ratings
+    return 100. * wins / total
 
 
 def main():
@@ -155,9 +143,6 @@ def main():
     AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
     MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
-    RATINGS = {"MM_Null": 1350, "MM_Open": 1575, "MM_Improved": 1620,
-               "AB_Null": 1510, "AB_Open": 1640, "AB_Improved": 1660,
-               "Random": 1150, "ID_Improved": 1500, "Student": 1500}
 
     # Create a collection of CPU agents using fixed-depth minimax or alpha beta
     # search, or random selection.  The agent names encode the search method
@@ -175,10 +160,8 @@ def main():
     # systems; i.e., the performance of the student agent is considered
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
-    test_agents = [Agent(CustomPlayer(score_fn=improved_score,
-                                      **CUSTOM_ARGS), "ID_Improved"),
-                   Agent(CustomPlayer(score_fn=custom_score,
-                                      **CUSTOM_ARGS), "Student")]
+    test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
+                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
 
     print(DESCRIPTION)
     for agentUT in test_agents:
@@ -188,16 +171,11 @@ def main():
         print("*************************")
 
         agents = random_agents + mm_agents + ab_agents + [agentUT]
-        players = dict([(a.player, RATINGS[a.name]) for a in agents])
-        ratings = play_round(agents, players, NUM_MATCHES)
+        win_ratio = play_round(agents, NUM_MATCHES)
 
-        ranking = sorted([(a, ratings[a.player]) for a in agents],
-                         key=lambda x: x[1])
         print("\n\nResults:")
         print("----------")
-        print("{!s:<15}{!s:>10}".format("Name", "Rating"))
-        print("{!s:<15}{!s:>10}".format("---", "---"))
-        print("\n".join(["{!s:<15}{:>10.2f}".format(a.name, r) for a, r in ranking]))
+        print("{!s:<15}{:>10.2f}%".format(agentUT.name, win_ratio))
 
 
 if __name__ == "__main__":

@@ -32,9 +32,9 @@ Your selection: {}
 """
 
 WRONG_NUM_EXPLORED = """
-Your {} search visited the wrong nodes at search depth {}.  If the number of
-visits is too large, make sure that iterative deepening is only running when
-the `iterative` flag is set in the agent constructor.
+Your {} search visited the wrong nodes at search depth {}.  If the number
+of visits is too large, make sure that iterative deepening is only
+running when the `iterative` flag is set in the agent constructor.
 Max explored size: {}
 Number you explored: {}
 """
@@ -150,9 +150,9 @@ def makeEvalStop(limit, timer, value=None):
     return score
 
 
-def makeBranchEval(branch_list):
+def makeBranchEval(first_branch):
     """Use a closure to create a heuristic function that evaluates to a nonzero
-    score when the root of the search is in a whitelist of branches, and
+    score when the root of the search is the first branch explored, and
     otherwise returns 0.  This heuristic is used to force alpha-beta to prune
     some parts of a game tree for testing.
 
@@ -161,7 +161,9 @@ def makeBranchEval(branch_list):
     """
 
     def score(game, player):
-        if game.root in branch_list:
+        if not first_branch:
+            first_branch.append(game.root)
+        if game.root in first_branch:
             return 1.
         return 0.
 
@@ -244,7 +246,7 @@ class Project1Test(unittest.TestCase):
     def test_minimax_interface(self):
         """ Test CustomPlayer.minimax interface with simple input """
         h, w = 7, 7  # board size
-        test_depth = 3
+        test_depth = 1
         starting_location = (5, 3)
         adversary_location = (0, 0)  # top left corner
         iterative_search = False
@@ -263,7 +265,7 @@ class Project1Test(unittest.TestCase):
 
         for move in board.get_legal_moves():
             next_state = board.forecast_move(move)
-            v = agentUT.minimax(next_state, test_depth - 1, False)
+            v, _ = agentUT.minimax(next_state, test_depth)
 
             self.assertTrue(type(v) == float,
                             ("Minimax function should return a floating " +
@@ -275,7 +277,7 @@ class Project1Test(unittest.TestCase):
     def test_alphabeta_interface(self):
         """ Test CustomPlayer.alphabeta interface with simple input """
         h, w = 9, 9  # board size
-        test_depth = 3
+        test_depth = 1
         starting_location = (2, 7)
         adversary_location = (0, 0)  # top left corner
         iterative_search = False
@@ -294,8 +296,7 @@ class Project1Test(unittest.TestCase):
 
         for move in board.get_legal_moves():
             next_state = board.forecast_move(move)
-            v = agentUT.alphabeta(next_state, test_depth - 1,
-                                  float("-inf"), float("inf"), False)
+            v, _ = agentUT.alphabeta(next_state, test_depth)
 
             self.assertTrue(type(v) == float,
                             ("Alpha Beta function should return a floating " +
@@ -307,7 +308,7 @@ class Project1Test(unittest.TestCase):
     def test_get_move_interface(self):
         """ Test CustomPlayer.get_move interface with simple input """
         h, w = 9, 9  # board size
-        test_depth = 3
+        test_depth = 1
         starting_location = (2, 7)
         adversary_location = (0, 0)  # top left corner
         iterative_search = False
@@ -317,21 +318,42 @@ class Project1Test(unittest.TestCase):
         # create a player agent & a game board
         agentUT = game_agent.CustomPlayer(
             test_depth, heuristic, iterative_search, search_method)
+
+        # Test that get_move returns a legal choice on an empty game board
         board = isolation.Board(agentUT, 'null_agent', w, h)
-
-        # place two "players" on the board at arbitrary (but fixed) locations
-        board.apply_move(starting_location)
-        board.apply_move(adversary_location)
-
-        # ignore the search timer for fixed-depth search by making the timer
-        # function always return a constant
         legal_moves = board.get_legal_moves()
         move = agentUT.get_move(board, legal_moves, lambda: 99)
         self.assertIn(move, legal_moves,
-                      ("The get_move() function should return a tuple of " +
+                      ("The get_move() function failed as player 1 on an " +
+                       "empty board. It should return coordinates on the " +
+                       "game board for the location of the agent's next " +
+                       "move. The move must be one of the legal moves on " +
+                       "the current game board."))
+
+        # Test that get_move returns a legal choice for first move as player 2
+        board = isolation.Board('null_agent', agentUT, w, h)
+        board.apply_move(starting_location)
+        legal_moves = board.get_legal_moves()
+        move = agentUT.get_move(board, legal_moves, lambda: 99)
+        self.assertIn(move, legal_moves,
+                      ("The get_move() function failed making the first " +
+                       "move as player 2 on a new board. It should return " +
                        "coordinates on the game board for the location " +
                        "of the agent's next move. The move must be one " +
                        "of the legal moves on the current game board."))
+
+        # Test that get_move returns a legal choice after first move
+        board = isolation.Board(agentUT, 'null_agent', w, h)
+        board.apply_move(starting_location)
+        board.apply_move(adversary_location)
+        legal_moves = board.get_legal_moves()
+        move = agentUT.get_move(board, legal_moves, lambda: 99)
+        self.assertIn(move, legal_moves,
+                      ("The get_move() function failed as player 1 on a " +
+                       "game in progress. It should return coordinates on" +
+                       "the game board for the location of the agent's " +
+                       "next move. The move must be one of the legal moves " +
+                       "on the current game board."))
 
     @timeout(1)
     # @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
@@ -384,11 +406,7 @@ class Project1Test(unittest.TestCase):
 
             # disable search timeout by returning a constant value
             agentUT.time_left = lambda: 1e3
-            moves = {m: agentUT.minimax(board.forecast_move(m),
-                                        test_depth - 1,
-                                        maximizing_player=False)
-                     for m in board.get_legal_moves()}
-            move = sorted(moves.items(), key=lambda x: x[-1])[-1][0]
+            _, move = agentUT.minimax(board, test_depth)
 
             num_explored_valid = board.counts[0] == counts[idx][0]
             num_unique_valid = board.counts[1] == counts[idx][1]
@@ -408,34 +426,32 @@ class Project1Test(unittest.TestCase):
         """ Test CustomPlayer.alphabeta
 
         This test uses a scoring function that returns a constant value based
-        on the location of the search agent on the board to force alphabeta to
-        choose a branch that visits those cells at a specific fixed-depth.
-        If alhpabeta is working properly, it will visit at most a specified
-        constant number of nodes during the search and return one of the
-        acceptable legal moves.()
+        on the branch being searched by alphabeta in the user agent, and forces
+        the search to prune on every other branch it visits. By using a huge
+        board where the players are too far apart to interact and every branch
+        has the same growth factor, the expansion and pruning must result in
+        an exact number of expanded nodes.
         """
-        h, w = 20, 20  # board size
-        starting_location = (12, 1)
+        h, w = 101, 101  # board size
+        starting_location = (50, 50)
         adversary_location = (0, 0)  # top left corner
         iterative_search = False
         method = "alphabeta"
 
-        # The agent under test starts at position (12, 2) on a board yielding
-        # legal moves [(10, 0), (10, 2), (11, 3), (13, 3), (14, 0), (14, 2)].
-        # The search function will pick one of those moves based on the
-        # estimated score for each branch.
-        legal_moves = [(10, 0), (10, 2), (11, 3), (13, 3), (14, 0), (14, 2)]
+        # The agent under test starts in the middle of a huge board so that
+        # every branch has the same number of possible moves, so pruning any
+        # branch has the same effect during testing
 
-        # These are the expected number of node expansions for minimax search
-        # to fully explore the game tree to fixed depth.  The custom eval
-        # function used for this test ensures that some branches must be
-        # pruned, while the search should still return an optimal move.
-        counts = [(86, 30), (426, 39), (2526, 81), (13026, 101)]
+        # These are the expected number of node expansions for alphabeta search
+        # to explore the game tree to fixed depth.  The custom eval function
+        # used for this test ensures that some branches must be pruned, while
+        # the search should still return an optimal move.
+        counts = [(8, 8), (17, 10), (74, 42), (139, 51), (540, 119)]
 
-        for idx in range(4):
-            test_depth = idx + 3  # pruning guarantee requires min depth of 3
-            choices = random.sample(legal_moves, 2)
-            heuristic = makeBranchEval(choices)
+        for idx in range(len(counts)):
+            test_depth = idx + 1  # pruning guarantee requires min depth of 3
+            first_branch = []
+            heuristic = makeBranchEval(first_branch)
             agentUT, board = self.initAUT(test_depth, heuristic,
                                           iterative_search, method,
                                           loc1=starting_location,
@@ -444,14 +460,10 @@ class Project1Test(unittest.TestCase):
 
             # disable search timeout by returning a constant value
             agentUT.time_left = lambda: 1e3
-            moves = {m: agentUT.alphabeta(board.forecast_move(m),
-                                          test_depth - 1,
-                                          maximizing_player=False)
-                     for m in board.get_legal_moves()}
-            move = sorted(moves.items(), key=lambda x: x[-1])[-1][0]
+            _, move = agentUT.alphabeta(board, test_depth)
 
-            num_explored_valid = board.counts[0] < counts[idx][0]
-            num_unique_valid = board.counts[1] <= counts[idx][1]
+            num_explored_valid = board.counts[0] == counts[idx][0]
+            num_unique_valid = board.counts[1] == counts[idx][1]
 
             self.assertTrue(num_explored_valid, WRONG_NUM_EXPLORED.format(
                 method, test_depth, counts[idx][0], board.counts[0]))
@@ -459,8 +471,8 @@ class Project1Test(unittest.TestCase):
             self.assertTrue(num_unique_valid, UNEXPECTED_VISIT.format(
                 method, test_depth, counts[idx][1], board.counts[1]))
 
-            self.assertIn(move, choices, WRONG_MOVE.format(
-                method, test_depth, choices, move))
+            self.assertIn(move, first_branch, WRONG_MOVE.format(
+                method, test_depth, first_branch, move))
 
 
     @timeout(10)
