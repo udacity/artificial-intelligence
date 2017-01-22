@@ -234,11 +234,13 @@ class Project1Test(unittest.TestCase):
 
         player1 = "Player1"
         player2 = "Player2"
+        p1_location = (0, 0)
+        p2_location = (1, 1)  # top left corner
         game = isolation.Board(player1, player2)
+        game.apply_move(p1_location)
+        game.apply_move(p2_location)
 
-        heuristic = game_agent.custom_score
-
-        self.assertIsInstance(heuristic(game, player1), float,
+        self.assertIsInstance(game_agent.custom_score(game, player1), float,
             "The heuristic function should return a floating point")
 
     timeout(1)
