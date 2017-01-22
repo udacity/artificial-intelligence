@@ -6,7 +6,7 @@ from aimacode.planning import Action
 from aimacode.utils import expr
 from aimacode.search import Node
 import unittest
-from helpers.lp_utils import decode_state
+from lp_utils import decode_state
 from my_air_cargo_problems import (
     air_cargo_p1, air_cargo_p2, air_cargo_p3,
 )

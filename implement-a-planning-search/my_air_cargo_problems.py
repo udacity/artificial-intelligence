@@ -1,40 +1,56 @@
-
-from helpers.planning_problem import PlanningProblem
-from helpers.lp_utils import FluentState, encode_state, decode_state, run_search
-
 from aimacode.logic import PropKB
 from aimacode.planning import Action
-from aimacode.search import InstrumentedProblem, Node
-from aimacode.search import breadth_first_search, astar_search, breadth_first_tree_search
-from aimacode.search import depth_first_graph_search, uniform_cost_search, greedy_best_first_graph_search
-from aimacode.search import depth_limited_search, recursive_best_first_search
+from aimacode.search import (
+    Node, Problem,
+)
 from aimacode.utils import expr
-
+from lp_utils import (
+    FluentState, encode_state, decode_state,
+)
 from my_planning_graph import PlanningGraph
 
 
-class AirCargoProblem(PlanningProblem):
-
+class AirCargoProblem(Problem):
     def __init__(self, cargos, planes, airports, initial: FluentState, goal: list):
+        """
+
+        :param cargos: list of str
+            cargos in the problem
+        :param planes: list of str
+            planes in the problem
+        :param airports: list of str
+            airports in the problem
+        :param initial: FluentState object
+            positive and negative literal fluents (as expr) describing initial state
+        :param goal: list of expr
+            literal fluents required for goal test
+        """
+        self.state_map = initial.pos + initial.neg
+        self.initial_state_TF = encode_state(initial, self.state_map)
+        Problem.__init__(self, self.initial_state_TF, goal=goal)
         self.cargos = cargos
         self.planes = planes
         self.airports = airports
-        PlanningProblem.__init__(self, initial, goal)
+        self.actions_list = self.get_actions()
 
     def get_actions(self):
         '''
-        This method creates concrete actions for all actions in the problem
-        domain. It is computationally expensive to call this method directly;
-        however, it is called in the PlanningProblem constructor and the
-        results cached in the `actions_list` property inherited by all
-        PlanningProblem subclasses.
+        This method creates concrete actions (no variables) for all actions in the problem
+        domain action schema and turns them into complete Action objects as defined in the
+        aimacode.planning module. It is computationally expensive to call this method directly;
+        however, it is called in the constructor and the results cached in the `actions_list` property.
 
         Returns:
         ----------
         list<Action>
             list of Action objects
         '''
-        #TODO Part 2 create concrete actions for the problem instance based on the domain actions: Load, Unload, and Fly
+
+        # TODO create concrete Action objects based on the domain action schema for: Load, Unload, and Fly
+        # concrete actions definition: specific literal action that does not include variables as with the schema
+        # for example, the action schema 'Load(c, p, a)' can represent the concrete actions 'Load(C1, P1, SFO)'
+        # or 'Load(C2, P2, JFK)'.  The actions for the planning problem must be concrete because the problems in
+        # forward search and Planning Graphs must use Propositional Logic
 
         def load_actions():
             '''Create all concrete Load actions and return a list
@@ -42,7 +58,7 @@ class AirCargoProblem(PlanningProblem):
             :return: list of Action objects
             '''
             loads = []
-            # TODO Part 2 using instance variables, create all load ground actions from the domain Load action
+            # TODO create all load ground actions from the domain Load action
             return loads
 
         def unload_actions():
@@ -51,7 +67,7 @@ class AirCargoProblem(PlanningProblem):
             :return: list of Action objects
             '''
             unloads = []
-            # TODO Part 2 using instance variables, create all Unload ground actions from the domain Unload action
+            # TODO create all Unload ground actions from the domain Unload action
             return unloads
 
         def fly_actions():
@@ -60,22 +76,54 @@ class AirCargoProblem(PlanningProblem):
             :return: list of Action objects
             '''
             flys = []
-            # TODO Part 2 using instance variables, create all Fly ground actions from the domain Fly action
+            for fr in self.airports:
+                for p in self.planes:
+                    for to in self.airports:
+                        if fr != to:
+                            precond_pos = [expr("At({}, {})".format(p, fr)),
+                                           ]
+                            precond_neg = []
+                            effect_add = [expr("At({}, {})".format(p, to))]
+                            effect_rem = [expr("At({}, {})".format(p, fr))]
+                            fly = Action(expr("Fly({}, {}, {})".format(p, fr, to)),
+                                         [precond_pos, precond_neg],
+                                         [effect_add, effect_rem])
+                            flys.append(fly)
             return flys
 
         return load_actions() + unload_actions() + fly_actions()
 
     def actions(self, state: str) -> list:
-        # TODO Part 2 implement (see PlanningProblem in helpers.planning_problem)
+        """ Return the actions that can be executed in the given state.
+
+        :param state: str
+            state represented as T/F string of mapped fluents (state variables)
+            e.g. 'FTTTFF'
+        :return: list of Action objects
+        """
+        # TODO implement
         possible_actions = []
         return possible_actions
 
     def result(self, state: str, action: Action):
-        # TODO implement (see PlanningProblem in helpers.planning_problem)
+        """ Return the state that results from executing the given
+        action in the given state. The action must be one of
+        self.actions(state).
+
+        :param state: state entering node
+        :param action: Action applied
+        :return: resulting state after action
+        """
+        # TODO implement
         new_state = FluentState([], [])
         return encode_state(new_state, self.state_map)
 
     def goal_test(self, state: str) -> bool:
+        """ Test the state to see if goal is reached
+
+        :param state: str representing state
+        :return: bool
+        """
         kb = PropKB()
         kb.tell(decode_state(state, self.state_map).pos_sentence())
         for clause in self.goal:
@@ -88,19 +136,6 @@ class AirCargoProblem(PlanningProblem):
         h_const = 1
         return h_const
 
-    def h_pg_setlevel(self, node: Node):
-        '''
-        This heuristic uses a planning graph representation of the problem
-        state space to estimate the minimum number of actions that must be
-        carried out from the current state in order to satisfy all of the goal
-        conditions.
-        '''
-        # TODO: Complete the implmentation of this heuristic in the 
-        # PlanningGraph class
-        pg = PlanningGraph(self, node.state)
-        pg_setlevel = pg.h_setlevel()
-        return pg_setlevel
-
     def h_pg_levelsum(self, node: Node):
         '''
         This heuristic uses a planning graph representation of the problem
@@ -108,8 +143,7 @@ class AirCargoProblem(PlanningProblem):
         out from the current state in order to satisfy each individual goal
         condition.
         '''
-        # TODO: Complete the implmentation of this heuristic in the 
-        # PlanningGraph class
+        # requires implemented PlanningGraph class
         pg = PlanningGraph(self, node.state)
         pg_levelsum = pg.h_levelsum()
         return pg_levelsum
@@ -121,11 +155,12 @@ class AirCargoProblem(PlanningProblem):
         conditions by ignoring the preconditions required for an action to be
         executed.
         '''
-        # TODO Part 3 implement (see Russell-Norvig Edition-3 10.2.3  or Russell-Norvig Edition-2 11.2)
+        # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
         count = 0
         return count
 
-def air_cargo_p1()->AirCargoProblem:
+
+def air_cargo_p1() -> AirCargoProblem:
     cargos = ['C1', 'C2']
     planes = ['P1', 'P2']
     airports = ['JFK', 'SFO']
@@ -149,10 +184,12 @@ def air_cargo_p1()->AirCargoProblem:
             ]
     return AirCargoProblem(cargos, planes, airports, init, goal)
 
-def air_cargo_p2()->AirCargoProblem:
-    # TODO Part 2 implement Problem 2 definition
+
+def air_cargo_p2() -> AirCargoProblem:
+    # TODO implement Problem 2 definition
     pass
 
-def air_cargo_p3()->AirCargoProblem:
-    # TODO Part 2 implement Problem 3 definition
+
+def air_cargo_p3() -> AirCargoProblem:
+    # TODO implement Problem 3 definition
     pass

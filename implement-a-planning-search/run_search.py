@@ -1,15 +1,10 @@
-
 import argparse
-
 from timeit import default_timer as timer
-
 from aimacode.search import InstrumentedProblem
 from aimacode.search import (breadth_first_search, astar_search,
     breadth_first_tree_search, depth_first_graph_search, uniform_cost_search,
     greedy_best_first_graph_search, depth_limited_search,
     recursive_best_first_search)
-from helpers import lp_utils
-
 from my_air_cargo_problems import air_cargo_p1, air_cargo_p2, air_cargo_p3
 
 PROBLEM_CHOICE_MSG = """
@@ -41,7 +36,7 @@ SEARCHES = [["breadth_first_search", breadth_first_search, ""],
             ['astar_search', astar_search, 'h_1'],
             ['astar_search', astar_search, 'h_ignore_preconditions'],
             ['astar_search', astar_search, 'h_pg_levelsum'],
-            ['astar_search', astar_search, 'h_pg_setlevel']]
+            ]
 
 
 class PrintableProblem(InstrumentedProblem):
@@ -65,7 +60,7 @@ def run_search(problem, search_function, parameter=None):
     end = timer()
     print("\nExpansions   Goal Tests   New Nodes")
     print("{}\n".format(ip))
-    lp_utils.show_solution(node, end - start)
+    show_solution(node, end - start)
     print()
 
 
@@ -106,6 +101,11 @@ def main(p_choices, s_choices):
             run_search(_p, s, _h)
 
 
+def show_solution(node, elapsed_time):
+    print("Plan length: {}  Time elapsed in seconds: {}".format(len(node.solution()), elapsed_time))
+    for action in node.solution():
+        print("{}{}".format(action.name, action.args))
+
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Solve air cargo planning problems " + 
         "using a variety of state space search methods including uninformed, greedy, " +
@@ -135,4 +135,3 @@ if __name__=="__main__":
             print("    {!s}. {} {}".format(idx+1, name, heuristic))
         print()
         print("Use manual mode for interactive selection:\n\n\tpython run_search.py -m\n")
-

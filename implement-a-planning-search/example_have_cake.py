@@ -1,21 +1,23 @@
-from helpers.lp_utils import (
-    FluentState, encode_state, decode_state, run_search
-)
-from helpers.planning_problem import PlanningProblem
-from my_planning_graph import PlanningGraph
 from aimacode.logic import PropKB
 from aimacode.planning import Action
 from aimacode.search import (
-    Node, breadth_first_search, astar_search, breadth_first_tree_search,
+    Node, breadth_first_search, astar_search,
     depth_first_graph_search, uniform_cost_search, greedy_best_first_graph_search,
-    depth_limited_search, recursive_best_first_search,
+    Problem,
 )
 from aimacode.utils import expr
+from lp_utils import (
+    FluentState, encode_state, decode_state
+)
+from my_planning_graph import PlanningGraph
+from run_search import run_search
 
 
-class HaveCakeProblem(PlanningProblem):
+class HaveCakeProblem(Problem):
     def __init__(self, initial: FluentState, goal: list):
-        PlanningProblem.__init__(self, initial, goal)
+        self.state_map = initial.pos + initial.neg
+        Problem.__init__(self, encode_state(initial, self.state_map), goal=goal)
+        self.actions_list = self.get_actions()
 
     def get_actions(self):
         precond_pos = [expr("Have(Cake)")]
@@ -80,14 +82,6 @@ class HaveCakeProblem(PlanningProblem):
         h_const = 1
         return h_const
 
-    def h_pg_setlevel(self, node: Node):
-        # uses the planning graph set-level heuristic calculated
-        # from this node to the goal
-        # requires implementation in PlanningGraph
-        pg = PlanningGraph(self, node.state)
-        pg_setlevel = pg.h_setlevel()
-        return pg_setlevel
-
     def h_pg_levelsum(self, node: Node):
         # uses the planning graph level-sum heuristic calculated
         # from this node to the goal
@@ -131,15 +125,18 @@ if __name__ == '__main__':
     print("Goal requirement for this problem are:")
     for g in p.goal:
         print('   {}'.format(g))
-    print("\n**** Have Cake example problem ****\nexpansions/goaltests/new_nodes/finalstate")
-    run_search(p, "breadth_first_search", breadth_first_search)
-    run_search(p, "breadth_first_tree_search", breadth_first_tree_search)
-    run_search(p, "depth_first_graph_search", depth_first_graph_search)
-    run_search(p, "depth_limited_search", depth_limited_search)
-    run_search(p, "uniform_cost_search", uniform_cost_search)
-    run_search(p, "recursive_best_first_search", recursive_best_first_search, p.h_1)
-    run_search(p, "greedy_best_first_graph_search", greedy_best_first_graph_search, p.h_1)
-    run_search(p, "astar_search - null heuristic", astar_search, p.h_1)
-    # run_search(p, "astar_search - ignore preconditions heuristic", astar_search, p.h_ignore_preconditions)
-    # run_search(p, "astar_search - levelsum heuristic", astar_search, p.h_pg_levelsum)
-    # run_search(p, "astar_search - setlevel heuristic", astar_search, p.h_pg_setlevel)
+    print()
+    print("*** Breadth First Search")
+    run_search(p, breadth_first_search)
+    print("*** Depth First Search")
+    run_search(p, depth_first_graph_search)
+    print("*** Uniform Cost Search")
+    run_search(p, uniform_cost_search)
+    print("*** Greedy Best First Graph Search - null heuristic")
+    run_search(p, greedy_best_first_graph_search, parameter=p.h_1)
+    print("*** A-star null heuristic")
+    run_search(p, astar_search, p.h_1)
+    # print("A-star ignore preconditions heuristic")
+    # rs(p, "astar_search - ignore preconditions heuristic", astar_search, p.h_ignore_preconditions)
+    # print(""A-star levelsum heuristic)
+    # rs(p, "astar_search - levelsum heuristic", astar_search, p.h_pg_levelsum)

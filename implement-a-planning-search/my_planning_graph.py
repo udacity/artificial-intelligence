@@ -1,9 +1,7 @@
-
-from helpers.planning_problem import PlanningProblem
-from helpers.lp_utils import decode_state
-
 from aimacode.planning import Action
+from aimacode.search import Problem
 from aimacode.utils import expr
+from lp_utils import decode_state
 
 
 class PgNode():
@@ -20,7 +18,7 @@ class PgNode():
         self.children = set()
         self.mutex = set()
 
-    def is_mutex(self, other)->bool:
+    def is_mutex(self, other) -> bool:
         ''' Boolean test for mutual exclusion
 
         :param other: PgNode
@@ -206,7 +204,7 @@ class PlanningGraph():
     graph can be used to reason about 
     '''
 
-    def __init__(self, problem: PlanningProblem, state: str, serial_planning=True):
+    def __init__(self, problem: Problem, state: str, serial_planning=True):
         '''
         :param problem: PlanningProblem (or subclass such as AirCargoProblem or HaveCakeProblem)
         :param state: str (will be in form TFTTFF... representing fluent states)
@@ -270,7 +268,8 @@ class PlanningGraph():
         '''
         # the graph should only be built during class construction
         if (len(self.s_levels) != 0) or (len(self.a_levels) != 0):
-            raise Exception('Planning Graph already created; construct a new planning graph for each new state in the planning sequence')
+            raise Exception(
+                'Planning Graph already created; construct a new planning graph for each new state in the planning sequence')
 
         # initialize S0 to literals in initial state provided.
         leveled = False
@@ -348,14 +347,14 @@ class PlanningGraph():
         '''
         nodelist = list(nodeset)
         for i, n1 in enumerate(nodelist[:-1]):
-            for n2 in nodelist[i+1:]:
-                if (self.serialize_actions(n1, n2) or 
-                    self.inconsistent_effects_mutex(n1, n2) or 
-                    self.interference_mutex(n1, n2) or
-                    self.competing_needs_mutex(n1, n2)):
+            for n2 in nodelist[i + 1:]:
+                if (self.serialize_actions(n1, n2) or
+                        self.inconsistent_effects_mutex(n1, n2) or
+                        self.interference_mutex(n1, n2) or
+                        self.competing_needs_mutex(n1, n2)):
                     mutexify(n1, n2)
 
-    def serialize_actions(self, node_a1: PgNode_a, node_a2: PgNode_a)->bool:
+    def serialize_actions(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         '''
         Test a pair of actions for mutual exclusion, returning True if the
         planning graph is serial, and if either action is persistent; otherwise
@@ -373,7 +372,7 @@ class PlanningGraph():
             return False
         return True
 
-    def inconsistent_effects_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a)->bool:
+    def inconsistent_effects_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         '''
         Test a pair of actions for inconsistent effects, returning True if
         one action negates an effect of the other, and False otherwise.
@@ -390,7 +389,7 @@ class PlanningGraph():
         # TODO test for Inconsistent Effects between nodes
         return False
 
-    def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a)->bool:
+    def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         '''
         Test a pair of actions for mutual exclusion, returning True if the 
         effect of one action is the negation of a precondition of the other.
@@ -407,7 +406,7 @@ class PlanningGraph():
         # TODO test for Interference between nodes
         return False
 
-    def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a)->bool:
+    def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         '''
         Test a pair of actions for mutual exclusion, returning True if one of
         the precondition of one action is mutex with a precondition of the
@@ -436,7 +435,7 @@ class PlanningGraph():
         '''
         nodelist = list(nodeset)
         for i, n1 in enumerate(nodelist[:-1]):
-            for n2 in nodelist[i+1:]:
+            for n2 in nodelist[i + 1:]:
                 if self.negation_mutex(n1, n2) or self.inconsistent_support_mutex(n1, n2):
                     mutexify(n1, n2)
 
@@ -484,16 +483,3 @@ class PlanningGraph():
         # TODO implement
         # for each goal in the problem, determine the level cost, then add them together
         return level_sum
-
-    def h_setlevel(self) -> int:
-        '''The level at which all the literals in the conjunctive goal
-        appear in the planning graph without any pair of them being mutually exclusive
-
-        :return: int
-            returns 0 if none found
-        '''
-        set_level = 0
-        # TODO implement
-        # find the S-level in the planning graph where all literals in the conjunctive goal
-        # are present but no pair are mutex
-        return set_level
