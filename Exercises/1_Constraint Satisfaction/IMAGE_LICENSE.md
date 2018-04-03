@@ -1,0 +1,1 @@
+("Chess qdt45.svg")[https://commons.wikimedia.org/wiki/File:Chess_qdt45.svg] by [Colin M.L. Burnett](https://en.wikipedia.org/wiki/User:Cburnett) is licensed under [CC Attribution-Share Alike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/deed.en).
