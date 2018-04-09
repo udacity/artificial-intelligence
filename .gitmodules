@@ -1,0 +1,3 @@
+[submodule "Projects/4_HMM Tagger"]
+	path = Projects/4_HMM Tagger
+	url = https://github.com/udacity/hmm-tagger
