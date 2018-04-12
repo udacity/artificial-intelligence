@@ -2,51 +2,42 @@
 
 ## Synopsis
 
-In this project, students will extend the Sudoku-solving agent developed in the classroom lectures to solve _diagonal_ Sudoku puzzles. A diagonal Sudoku puzzle is identical to traditional Sudoku puzzles with the added constraint that the boxes on the two main diagonals of the board must also contain the digits 1-9 in each cell (just like the rows, columns, and 3x3 blocks).
-
-## Instructions
-
-Follow the instructions in the classroom lesson to install and configure the AIND [Anaconda](https://www.continuum.io/downloads) environment. That environment includes several important packages that are used for the project. 
-
-**YOU ONLY NEED TO WRITE CODE IN `solution.py`.**
+In this project, you will extend the Sudoku-solving agent developed in the classroom lectures to solve _diagonal_ Sudoku puzzles and implement a new constraint strategy called "naked twins". A diagonal Sudoku puzzle is identical to traditional Sudoku puzzles with the added constraint that the boxes on the two main diagonals of the board must also contain the digits 1-9 in each cell (just like the rows, columns, and 3x3 blocks).
 
 
 ## Quickstart Guide
 
-### Activate the aind environment (OS X or Unix/Linux)
+**YOU ONLY NEED TO WRITE CODE IN `solution.py`.**
+
+1. Follow the instructions in the classroom lesson to install and configure the `aind` [Anaconda](https://www.continuum.io/downloads) environment which includes several important packages that are used for the project. OS X or Unix/Linux users can activate the aind environment by running the following (Windows users simply run `activate aind`):
     
     `$ source activate aind`
 
-### Activate the aind environment (Windows)
-
-    `> activate aind`
-
-### Run the code & visualization
-
-    `(aind)$ python solution.py`
-
-### Run the local test suite
+2. You can run a small set of test cases using the local test suite. 
 
     `(aind)$ python -m unittest -v`
 
-### Run the remote test suite & submit the project
+3. Once you pass all the test cases in the local test suite, you can submit the project to run more comprehensive tests with the remote test suite:
 
     `(aind)$ udacity submit`
 
+4. You can run the code with visualization (see the last section of the readme for more information)
 
-## Coding
+    `(aind)$ python solution.py`
 
-You must complete the required functions in the 'solution.py' file (copy in code from the classroom where indicated, and add or extend with new code as described below). The `test_solution.py` file includes a few unit tests for local testing (See the unittest module for information on getting started.), but the primary mechanism for testing your code is the Udacity Project Assistant command line utility described in the next section.
 
-YOU SHOULD EXPECT TO MODIFY OR WRITE YOUR OWN UNIT TESTS AS PART OF COMPLETING THIS PROJECT. The Project Assistant test suite is not shared with students. Writing your own tests leads to a deeper understanding of the project.
+### Notes
 
-1. Run the following command from inside the project folder in your terminal to verify that your system is properly configured for the project. You should see feedback in the terminal about failed test cases -- which makes sense because you haven't implemented any code yet. You will reuse this command later to execute your **local** test cases.
+- You will not receive credit for the project until you submit the zip file created by `udacity submit` in your classroom.
 
-    `$ python -m unittest -v`
+- You must submit _exactly_ the zip file created by the CLI in step 3 to the classroom; if you make any changes to the file, you'll receive an error message when you attempt to submit in the classroom.
 
-1. Run the following command from inside the project folder in your terminal to verify that the Udacity-PA tool is installed properly. You should see a list of failed test cases -- which is good because you haven't implemented any code yet. You will reuse this command later to execute the **remote** test cases and complete the project.
 
-    `$ udacity submit`
+## Instructions
+
+You must complete the required functions in the 'solution.py' file (copy in code from the classroom where indicated, and add or extend with new code as described below). The `test_solution.py` file includes a few unit tests for local testing (See the [unittest module]() documentation for more information on getting started.), but the primary mechanism for testing your code is the Udacity Project Assistant command line utility described in the next section.
+
+YOU SHOULD EXPECT TO MODIFY OR WRITE YOUR OWN UNIT TESTS AS PART OF COMPLETING THIS PROJECT. There is no requirement to write test cases, but the Project Assistant test suite is not shared with students so writing your own tests may be necessary to find and resolve any errors that arise there.
 
 1. Add the two new diagonal units to the `unitlist` at the top of solution.py. Re-run the local tests with `python -m unittest` to confirm your solution. 
 
@@ -54,7 +45,7 @@ YOU SHOULD EXPECT TO MODIFY OR WRITE YOUR OWN UNIT TESTS AS PART OF COMPLETING T
 
 1. Implement the `naked_twins()` function, and update `reduce_puzzle()` to call it (along with the other existing strategies). Re-run the local tests with `python -m unittest -v` to confirm your solution.
 
-1. Write your own test cases to further test your code. Re-run the remote tests with `udacity submit` to confirm your solution. If any of the remote test cases fail, use the feedback to write new local test cases that you can use for debugging.
+1. Run the remote tests with `udacity submit` to confirm your solution. If any of the remote test cases fail, use the feedback to write your own local test cases for debugging.
 
 
 ## Submission
@@ -68,9 +59,9 @@ Once your project passes all test cases on the Project Assistant, submit the zip
 
 ## Troubleshooting
 
-Your classroom mentor may be able to provide some guidance on the project, but the [discussion forums](https://discussions.udacity.com/c/nd889-intro-sudoku) or [slack team](https://ai-nd.slack.com) (especially the #p-sudoku channel) should be your primary support resources. The instructors hold regularly scheduled office hours in the Slack community. (The schedule is posted in the description of the #office-hours channel.)
+Your classroom mentor may be able to provide some guidance on the project, but the [slack community](https://a-ind.slack.com) should be your primary support resources. Instructors hold regularly scheduled office hours in the Slack community. (The schedule is posted in the description of the #office-hours channel.)
 
-Contact ai-support@udacity.com if you don't have access to the forums or Slack team.
+Contact ai-support@udacity.com if you don't have access to the Slack community.
 
 
 ## Visualization
