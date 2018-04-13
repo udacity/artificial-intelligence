@@ -3,11 +3,11 @@ import shutil
 import os
 from udacity_pa import udacity
 
-nanodegree = 'nd889'
+nanodegree = 'nd898'
 projects = ['sudoku']
 
 def submit(args):
-  filenames = ['solution.py', 'README.md']
+  filenames = ['solution.py']
 
   udacity.submit(nanodegree, projects[0], filenames, 
                  environment = args.environment,
