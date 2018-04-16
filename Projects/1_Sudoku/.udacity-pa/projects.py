@@ -1,5 +1,3 @@
-import argparse
-import shutil
 import os
 from udacity_pa import udacity
 
