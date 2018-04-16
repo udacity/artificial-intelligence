@@ -3,7 +3,6 @@
 import bisect
 import collections
 import collections.abc
-import functools
 import operator
 import os.path
 import random
@@ -139,30 +138,28 @@ def print_table(table, header=None, sep='   ', numfmt='%g'):
 # See https://docs.python.org/3/reference/expressions.html#operator-precedence
 # See https://docs.python.org/3/reference/datamodel.html#special-method-names
 
-
-class Expr(namedtuple("Expr", "op args")):
+class Expr(object):
     """A mathematical expression with an operator and 0 or more arguments.
     op is a str like '+' or 'sin'; args are Expressions.
     Expr('x') or Symbol('x') creates a symbol (a nullary Expr).
     Expr('-', x) creates a unary; Expr('+', x, 1) creates a binary."""
-    def __new__(cls, op, *args):
-        return super(cls, Expr).__new__(cls, op=op, args=args)
+    __slots__ = ["op", "args", "__hash"]
+    def __init__(self, op, *args):
+        self.op = op
+        self.args = args
+        self.__hash = hash(self.op) ^ hash(self.args)
 
-    # cache unary operators for speed; handle negation
-    @lru_cache(maxsize=8192)
-    def __unary_op(self, op):
-        if '~' == self.op == op:
-            return expr(self.args[0])
-        elif '-' == self.op == op:
-            return expr(self.args[0])
-        elif '+' == op:
-            return self
-        return Expr(op, self)
+    def __eq__(self, other):
+        return (isinstance(other, Expr)
+                and self.op == other.op
+                and self.args == other.args)
+
+    def __hash__(self): return self.__hash
 
     # custom unary operator overloads to handle 
-    def __neg__(self): return self.__unary_op('-')
-    def __pos__(self): return self.__unary_op('+')
-    def __invert__(self): return self.__unary_op('~')
+    def __pos__(self): return self
+    def __neg__(self): return self.args[0] if '-' == self.op else Expr("-", self)
+    def __invert__(self): return self.args[0] if '~' == self.op else Expr("~", self)
 
     # Operator overloads
     # def __neg__(self): return Expr('-', self)
@@ -264,7 +261,7 @@ class PartialExpr:
     def __repr__(self):          return "PartialExpr('{}', {})".format(self.op, self.lhs)
 
 
-@functools.lru_cache(maxsize=8192)
+@lru_cache()
 def expr(x):
     """Shortcut to create an Expression. x is a str in which:
     - identifiers are automatically defined as Symbols.
