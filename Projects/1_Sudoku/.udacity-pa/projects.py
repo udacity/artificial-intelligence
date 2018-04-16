@@ -4,7 +4,7 @@ import os
 from udacity_pa import udacity
 
 nanodegree = 'nd898'
-projects = ['sudoku']
+projects = ['sudoku_solver']
 
 def submit(args):
   filenames = ['solution.py']
