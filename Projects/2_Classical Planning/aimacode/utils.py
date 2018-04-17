@@ -301,12 +301,8 @@ class defaultkeydict(collections.defaultdict):
 # ______________________________________________________________________________
 # Queues: Stack, FIFOQueue, PriorityQueue
 
-# TODO: Possibly use queue.Queue, queue.PriorityQueue
-# TODO: Priority queues may not belong here -- see treatment in search.py
-
 
 class Queue:
-
     """Queue is an abstract class/interface. There are three types:
         Stack(): A Last In First Out Queue.
         FIFOQueue(): A First In First Out Queue.
@@ -334,9 +330,12 @@ def Stack():
 
 
 class FIFOQueue(Queue):
-
-    """A First-In-First-Out Queue."""
-
+    """A First-In-First-Out Queue implemented with collections.deque
+    
+    MODIFIED FROM AIMA VERSION
+        - Use deque
+        - Use an additional dict to track membership
+    """
     def __init__(self):
         self.A = deque()
         self.__keys = set()
@@ -364,7 +363,6 @@ class PriorityQueue(Queue):
     MODIFIED FROM AIMA VERSION
         - Use heapq
         - Use an additional dict to track membership
-        - remove __delitem__ (AIMA version contains error)
     """
 
     def __init__(self, order=None, f=lambda x: x):
