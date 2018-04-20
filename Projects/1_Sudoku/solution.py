@@ -12,7 +12,6 @@ diagonal_units = [
 
 unitlist = row_units + column_units + square_units + diagonal_units
 
-
 # Must be called after all units (including diagonals) are added to the unitlist
 units = extract_units(unitlist, boxes)
 peers = extract_peers(units, boxes)
@@ -46,7 +45,18 @@ def naked_twins(values):
     strategy repeatedly).
     """
     # TODO: Implement this function!
-    raise NotImplementedError
+    display(values)
+    for unit in unitlist:
+        for box_key in unit:
+            if len(values[box_key]) == 2:
+                occurence = [key for key in unit if values[key] == values[box_key]]
+                if len(occurence) == 2: # found naked twin
+                    print('Naked Twin : ' + str(values[box_key]))
+                    for key in unit:
+                        if values[key] != values[box_key]: # not one of naked twin
+                            values[key] = values[key].replace(values[box_key][0], '').replace(values[box_key][1], '')
+    display(values)
+    return values
 
 
 def eliminate(values):
