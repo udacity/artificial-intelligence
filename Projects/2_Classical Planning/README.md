@@ -39,7 +39,7 @@ $ python example_have_cake.py
 
 2. Complete all TODO sections in `my_planning_graph.py`. You should refer to chapter 10 of AIMA 3rd edition or chapter 11 of AIMA 2nd edition (available [on the AIMA book site](http://aima.cs.berkeley.edu/2nd-ed/newchap11.pdf)) and the detailed instructions inline with each TODO statement. Test your code for this module by running:
 ```
-$ python -m unittest -m unittest -v
+$ python -m unittest -v
 ```
 
 3. Experiment with different search algorithms using the `run_search.py` script. (See example usage below.) The goal of your experiment is to understand the tradeoffs in speed, optimality, and complexity of progression search as problem size increases. You will record your results in a report (described below in [Report Requirements](#report-requirements)).
