@@ -136,7 +136,7 @@ class TestPlanningGraphMutex(unittest.TestCase):
         self.assertTrue(self.action_layer._competing_needs(*acts),
             "'{!s}' and '{!s}' should be mutually exclusive by competing needs".format(*acts))
 
-        # interference mutexes are dynamic -- they only appear in some levels of the planning graph
+        # competing needs mutexes are dynamic -- they only appear in some levels of the planning graph
         for idx, layer in enumerate(self.cake_pg.action_layers):
             if set(self.competing_needs_actions) <= layer:
                 self.assertTrue(layer.is_mutex(*self.competing_needs_actions),
