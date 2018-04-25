@@ -46,13 +46,22 @@ def naked_twins(values):
     """
     # TODO: Implement this function!
     for unit in unitlist:
+        # 0. Initialize
+        naked_twins_list = [] # List of naked twins in a unit
+
+        # 1. Find all naked twins
         for box_key in unit:
             if len(values[box_key]) == 2:
                 occurence = [key for key in unit if values[key] == values[box_key]]
                 if len(occurence) == 2: # found naked twin
-                    for key in unit:
-                        if values[key] != values[box_key]: # not one of naked twin
-                            values[key] = values[key].replace(values[box_key][0], '').replace(values[box_key][1], '')
+                    naked_twins_list.append((occurence, values[box_key], unit))
+        
+        # 2. Eliminate with naked twins
+        for occurence, value_pair, unit in naked_twins_list:
+            for key in unit:
+                if key not in occurence: # This box is not one of naked twin
+                    values[key] = values[key].replace(value_pair[0], '').replace(value_pair[1], '')
+
     return values
 
 
