@@ -1,0 +1,32 @@
+class: "GraphSearchTest"
+algorithm: "breadthFirstSearch"
+
+diagram: """
+ B   
+ ^
+ |
+*A --> C --> G
+ |
+ V
+ D
+
+A is the start state, G is the goal.  Arrows mark 
+possible state transitions.  This tests whether
+you extract the sequence of actions correctly even
+if your search backtracks.  If you fail this, your
+nodes are not correctly tracking the sequences of
+actions required to reach them.
+"""
+# The following section specifies the search problem and the solution.
+# The graph is specified by first the set of start states, followed by
+# the set of goal states, and lastly by the state transitions which are
+# of the form: 
+#      <start state> <actions> <end state> <cost>
+graph: """
+start_state: A
+goal_states: G
+A 0:A->B B 1.0
+A 1:A->C C 2.0
+A 2:A->D D 4.0
+C 0:C->G G 8.0
+"""

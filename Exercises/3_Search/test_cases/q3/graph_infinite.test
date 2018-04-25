@@ -1,0 +1,30 @@
+# Graph where natural action choice leads to an infinite loop
+class: "GraphSearchTest"
+algorithm: "uniformCostSearch"
+
+diagram: """
+ B <--> C
+ ^     /|
+ |    / |
+ V   /  V
+*A<-/  [G]
+
+A is the start state, G is the goal.  Arrows mark 
+possible state transitions.
+"""
+# The following section specifies the search problem and the solution.
+# The graph is specified by first the set of start states, followed by
+# the set of goal states, and lastly by the state transitions which are
+# of the form: 
+#      <start state> <actions> <end state> <cost>
+graph: """
+start_state: A
+goal_states: G
+A 0:A->B B 1.0
+B 0:B->A A 2.0
+B 1:B->C C 4.0
+C 0:C->A A 8.0
+C 1:C->G G 16.0
+C 2:C->B B 32.0
+"""
+
