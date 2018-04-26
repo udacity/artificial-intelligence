@@ -19,6 +19,11 @@ peers = extract_peers(units, boxes)
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
 
+    The naked twins strategy says that if you have two or more unallocated boxes
+    in a unit and there are only two digits that can go in those two boxes, then
+    those two digits can be eliminated from the possible assignments of all other
+    boxes in the same unit.
+
     Parameters
     ----------
     values(dict)
