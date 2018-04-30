@@ -16,7 +16,11 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
-        raise NotImplementedError
+        for effectA in actionA.effects:
+            for effectB in actionB.effects:
+                if effectA == ~effectB:
+                    return True
+        return False
 
 
     def _interference(self, actionA, actionB):
@@ -27,7 +31,15 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
-        raise NotImplementedError
+        for precondA in actionA.preconditions:
+            for effectB in actionB.effects:
+                if effectB == ~precondA:
+                    return True
+        for precondB in actionB.preconditions:
+            for effectA in actionA.effects:
+                if effectA == ~precondB:
+                    return True
+        return False
 
     def _competing_needs(self, actionA, actionB):
         """ Return True if the preconditions of the actions are all pairwise mutex in the parent layer 
@@ -38,7 +50,11 @@ class ActionLayer(BaseActionLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        raise NotImplementedError
+        for precondA in actionA.preconditions:
+            for precondB in actionB.preconditions:
+                if self.parent_layer.is_mutex(precondA, precondB):
+                    return True
+        return False
 
 
 class LiteralLayer(BaseLiteralLayer):
