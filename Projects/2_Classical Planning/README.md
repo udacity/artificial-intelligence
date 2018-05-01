@@ -32,7 +32,7 @@ $ source activate aind
 
 ## Completing the Project
 
-1. Run the example problem (based on the cake problem from Fig 10.7 in Chapter 10.3 of AIMA ed3). The script will print information about the problem domain and solve it with  several different search algorithms.
+1. Make sure that everything is working by running the example problem (based on the cake problem from Fig 10.7 in Chapter 10.3 of AIMA ed3). The script will print information about the problem domain and solve it with several different search algorithms.
 ```
 $ python example_have_cake.py
 ```
@@ -111,6 +111,9 @@ for plan synthesis by state space and CSP search](https://ac.els-cdn.com/S000437
 
 3. Use a different language
 	- Python is slow. Using a faster language can deliver a few orders of magnitude faster performance, which can make non-trivial problem domains feasible. The planning graph is particularly inefficient, in part due to idiosyncrasies of Python with an implementation designed for _clarity_ rather than performance. The [Europa](https://github.com/nasa/europa) planner from NASA should be much faster.
+
+4. Build your own problems
+    - The air cargo domain problems implemented for you were chosen to represent various changes in complexity. There are many other problems that you could implement on your own. For example, the block world problem and spare tire problem in the AIMA textbook. You can also find examples online of planning domain problems. Implement one or more problems beyond the air cargo domain and see how your planner works in those domains.
 
 
 ### Additional Search Topics
