@@ -67,12 +67,26 @@ class LiteralLayer(BaseLiteralLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        raise NotImplementedError
+        # 1. Compile all ways to achieve literalA and literalB
+        actionsA = []
+        actionsB = []
+        for action, literals in self.parent_layer.children.items():
+            if literalA in literals:
+                actionsA.append(action)
+            if literalB in literals:
+                actionsB.append(action)
+
+        ## Check all combinations of actionsA and actionsB
+        for actionA in actionsA:
+            for actionB in actionsB:
+                if not self.parent_layer.is_mutex(actionA, actionB):
+                    return False
+        return True
 
     def _negation(self, literalA, literalB):
         """ Return True if two literals are negations of each other """
         # TODO: implement this function
-        raise NotImplementedError
+        return literalA == ~literalB
 
 
 class PlanningGraph:
