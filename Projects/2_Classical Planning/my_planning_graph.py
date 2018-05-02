@@ -170,7 +170,18 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic with A*
         """
         # TODO: implement maxlevel heuristic
-        raise NotImplementedError
+        found_goals = []
+        max_level = 0
+
+        while len(found_goals) < len(self.goal):
+            last_literal_layer = self.literal_layers[-1]
+            for literal in last_literal_layer:
+                if literal in self.goal and literal not in found_goals:
+                    found_goals.append(found_goals)
+                    max_level = len(self.literal_layers) - 1 ## level is zero-indexed
+            self._extend()
+
+        return max_level
 
     def h_setlevel(self):
         """ Calculate the set level heuristic for the planning graph
