@@ -212,7 +212,22 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
-        raise NotImplementedError
+
+        while True: # Repeat until set level is found
+            last_literal_layer = self.literal_layers[-1]
+            if set(self.goal).issubset(last_literal_layer): # contains all goal
+                is_mutex = False # Check for mutually exclusive pairs
+                for goalA in self.goal:
+                    for goalB in self.goal:
+                        if last_literal_layer.is_mutex(goalA, goalB):
+                            is_mutex = True
+                            break
+                    if is_mutex:
+                        break
+                if not is_mutex:
+                    return len(self.literal_layers) - 1 # level is zero-indexed
+
+            self._extend()
 
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
