@@ -188,7 +188,7 @@ class PlanningGraph:
             last_literal_layer = self.literal_layers[-1]
             for literal in last_literal_layer:
                 if literal in self.goal and literal not in found_goals:
-                    found_goals.append(found_goals)
+                    found_goals.append(literal)
                     max_level = len(self.literal_layers) - 1 ## level is zero-indexed
             self._extend()
 
