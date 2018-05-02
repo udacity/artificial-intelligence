@@ -1,7 +1,7 @@
 
 import unittest
 
-from itertools import chain
+from itertools import chain, combinations
 
 from aimacode.utils import expr
 from aimacode.planning import Action
