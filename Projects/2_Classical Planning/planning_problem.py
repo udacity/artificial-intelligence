@@ -7,6 +7,10 @@ from aimacode.search import Node, Problem
 from _utils import encode_state, decode_state
 from my_planning_graph import PlanningGraph
 
+    ##############################################################################
+    #                 YOU DO NOT NEED TO MODIFY CODE IN THIS FILE                #
+    ##############################################################################
+
 
 class BasePlanningProblem(Problem):
     def __init__(self, initial, goal):
