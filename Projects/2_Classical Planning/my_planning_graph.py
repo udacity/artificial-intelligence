@@ -30,7 +30,7 @@ class ActionLayer(BaseActionLayer):
         raise NotImplementedError
 
     def _competing_needs(self, actionA, actionB):
-        """ Return True if the preconditions of the actions are all pairwise mutex in the parent layer 
+        """ Return True if any preconditions of the two actions are pairwise mutex in the parent layer
         
         See Also
         --------
