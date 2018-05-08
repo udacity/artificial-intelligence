@@ -156,13 +156,6 @@ class TestPlanningGraphMutex(unittest.TestCase):
                 )
 
     def test_competing_needs_mutex(self):
-        acts = [self.no_ops[0], self.no_ops[2]]
-        self.assertFalse(self.action_layer._competing_needs(*acts),
-            "'{!s}' and '{!s}' should NOT be mutually exclusive by competing needs".format(*acts))
-        acts = [self.no_ops[0], self.no_ops[1]]
-        self.assertTrue(self.action_layer._competing_needs(*acts),
-            "'{!s}' and '{!s}' should be mutually exclusive by competing needs".format(*acts))
-
         for acts in combinations(self.fake_competing_needs_actions, 2):
             self.assertFalse(self.not_competing_action_layer._competing_needs(*acts),
                 ("'{!s}' and '{!s}' should NOT be mutually exclusive by competing needs unless " +
