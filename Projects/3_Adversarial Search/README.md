@@ -60,14 +60,21 @@ Your agent will automatically read the contents of a file named `data.pickle` if
 
 #### Saving Information Between Turns
 The `CustomPlayer` class can pass internal state by assigning the data to the attribute `self.context`. An instance of your agent class will carry the context between each turn of a single game, but the contents will be reset at the start of any new game.
+```
+def get_action(...):
+    action = self.mcts()
+    self.queue.put(action)
+    self.context = object_you_want_to_save  # self.context will contain this object on the next turn
+```
 
+## Pick an Experiment
 
 Select at least one of the following to implement and evaluate in your report. (There is no upper limit on the techniques you incorporate into your agent.)
 
-
 ### Option 1: Develop a custom heuristic (must not be one of the heuristics from lectures, and cannot only be a combination of the number of liberties available to each agent)
-    - Create a performance baseline using `run_search.py` (with the `fair_matches` flag enabled) to evaluate the effectiveness of your agent using the #my_moves - #opponent_moves heuristic from lecture
-    - Use the same process to evaluate the effectiveness of your agent using your own custom heuristic
+
+- Create a performance baseline using `run_search.py` (with the `fair_matches` flag enabled) to evaluate the effectiveness of your agent using the #my_moves - #opponent_moves heuristic from lecture
+- Use the same process to evaluate the effectiveness of your agent using your own custom heuristic
     
 **Hints:**
 - Research other games (chess, go, connect4, etc.) to get ideas for developing good heuristics
@@ -77,9 +84,10 @@ Select at least one of the following to implement and evaluate in your report. (
 
 
 ### Option 2: Develop an opening book (must span at least depth 4 of the search tree)
-    - Write your own code to develop an opening book of the best moves for every possible game state from an empty board to at least a depth of 4 plies
-    - Create a performance baseline using `run_search.py` (with the `fair_matches` flag _disabled_) to evaluate the effectiveness of your agent using randomly chosen opening moves.  (You can use any heuristic function, but you should use the same heuristic on your agent for all experiments.)
-    - Use the same procedure to evaluate the effectiveness of your agent when early moves are selected from your opening book
+
+- Write your own code to develop an opening book of the best moves for every possible game state from an empty board to at least a depth of 4 plies
+- Create a performance baseline using `run_search.py` (with the `fair_matches` flag _disabled_) to evaluate the effectiveness of your agent using randomly chosen opening moves.  (You can use any heuristic function, but you should use the same heuristic on your agent for all experiments.)
+- Use the same procedure to evaluate the effectiveness of your agent when early moves are selected from your opening book
 
 **Hints:**
 - Developing an opening book can require long run-times to simulate games and accumulate outcome statistics
@@ -93,16 +101,17 @@ For example, the contents of dictionary `my_data` can be saved to disk:
 import pickle
 from isolation import Isolation
 state = Isolation()
-my_data = {state.board: 57}  # opening book chooses the middle square 
+my_data = {state: 57}  # opening book always chooses the middle square on an open board
 with open("data.pickle", 'wb') as f:
     pickle.dump(my_data, f)
 ```
 
 
 ### Option 3: Build an agent using advanced search techniques (for example: killer heuristic, principle variation search (not in lecture), or monte carlo tree search (not in lecture))
-    - Create a performance baseline using `run_search.py` to evaluate the effectiveness of a baseline agent (e.g., an agent using your minimax or alpha-beta search code from the classroom)
-    - Use `run_search.py` to evaluate the effectiveness of your agent using your own custom search techniques
-    - You must decide whether to test with or without "fair" matches enabled--justify your choice in your report
+
+- Create a performance baseline using `run_search.py` to evaluate the effectiveness of a baseline agent (e.g., an agent using your minimax or alpha-beta search code from the classroom)
+- Use `run_search.py` to evaluate the effectiveness of your agent using your own custom search techniques
+- You must decide whether to test with or without "fair" matches enabled--justify your choice in your report
     
 **Hints:**
 - If the results are very close, try increasing the number of matches (e.g., >100) to increase your confidence in the results
