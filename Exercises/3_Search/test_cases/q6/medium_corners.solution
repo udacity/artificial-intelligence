@@ -1,0 +1,16 @@
+# This solution file specifies the length of the optimal path
+# as well as the thresholds on number of nodes expanded to be
+# used in scoring.
+cost: "106"
+path: """
+North East East East East North North West West West West North North
+North North North North North North West West West West South South
+East East East East South South South South South South West West
+South South South West West East East North North North East East East
+East East East East East South South East East East East East North
+North East East North North East East North North East East East East
+South South South South East East North North East East South South
+South South South North North North North North North North West West
+North North East East North North
+"""
+thresholds: "2000 1600 1200"

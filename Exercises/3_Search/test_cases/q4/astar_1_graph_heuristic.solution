@@ -1,0 +1,7 @@
+# This is the solution file for test_cases/q4/astar_1_graph_heuristic.test.
+# This solution is designed to support both right-to-left
+# and left-to-right implementations.
+solution: "0 0 2"
+expanded_states: "S A D C"
+rev_solution: "0 0 2"
+rev_expanded_states: "S A D C"

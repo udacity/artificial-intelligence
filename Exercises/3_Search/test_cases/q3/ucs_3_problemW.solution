@@ -1,0 +1,34 @@
+# This is the solution file for test_cases/q3/ucs_3_problemW.test.
+# This solution is designed to support both right-to-left
+# and left-to-right implementations.
+# Number of nodes expanded must be with a factor of 1.1 of the numbers below.
+solution: """
+West West West West West West West West West West West West West West
+West West West West West West West West West West West West West West
+West West West West West South South South South South South South
+South South East East East North North North North North North North
+East East South South South South South South East East North North
+North North North North East East South South South South East East
+North North East East South South East East East South South West West
+West West West West South South West West West West West South West
+West West West West South South East East East East East East East
+North East East East East East North North East East East East East
+East South South West West West West South South West West West West
+West South West West West West West West West West West
+"""
+expanded_nodes: "173"
+rev_solution: """
+West West West West West West West West West West West West West West
+West West West West West West West West West West West West West West
+West West West West West South South South South South South South
+South South East East East North North North North North North North
+East East South South South South South South East East North North
+North North North North East East South South South South East East
+North North East East South South East East East South South West West
+West West West West South South West West West West West South West
+West West West West South South East East East East East East East
+North East East East East East North North East East East East East
+East South South West West West West South South West West West West
+West South West West West West West West West West West
+"""
+rev_expanded_nodes: "173"

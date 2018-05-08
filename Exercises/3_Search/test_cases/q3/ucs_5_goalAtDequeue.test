@@ -1,0 +1,29 @@
+class: "GraphSearchTest"
+algorithm: "uniformCostSearch"
+
+diagram: """
+    1      1      1
+*A ---> B ---> C ---> [G]
+ |                     ^
+ |         10          |
+ \---------------------/
+
+A is the start state, G is the goal.  Arrows mark possible state 
+transitions.  The number next to the arrow is the cost of that transition.
+
+If you fail this test case, you may be incorrectly testing if a node is a goal 
+before adding it into the queue, instead of testing when you remove the node 
+from the queue.  See the algorithm pseudocode in lecture.
+"""
+
+graph: """
+start_state: A
+goal_states: G
+A 0:A->G G 10.0
+A 1:A->B B 1.0
+B 0:B->C C 1.0
+C 0:C->G G 1.0
+"""
+# We only care about the solution, not the expansion order.
+exactExpansionOrder: "False"
+

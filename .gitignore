@@ -1,2 +1,11 @@
 __pycache__/
 .ipynb_checkpoints
+.cache/
+
+# Sudoku Solver Submission Output
+sudoku_solver*.zip
+sudoku_solver*.json
+
+# Classical Planning Submission Output
+classical_planning*.zip
+classical_planning*.json

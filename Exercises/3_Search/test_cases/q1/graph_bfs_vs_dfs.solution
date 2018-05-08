@@ -1,0 +1,7 @@
+# This is the solution file for test_cases/q1/graph_bfs_vs_dfs.test.
+# This solution is designed to support both right-to-left
+# and left-to-right implementations.
+solution: "2:A->D 0:D->G"
+expanded_states: "A D"
+rev_solution: "0:A->B 0:B->D 0:D->G"
+rev_expanded_states: "A B D"
