@@ -128,15 +128,21 @@ class Test_1_PlanningGraphMutex(unittest.TestCase):
             '{!s}' and '{!s}' should NOT be mutually exclusive by interference.
             None of these effects {!s} negates any of these preconditions {!s}
             and none of these effects {!s} negates any of these preconditions {!s}.
-        """, acts[0], acts[1], acts[0].effects, acts[1].preconditions,
+        """, acts[0], acts[1], list(acts[0].effects), list(acts[1].preconditions),
         acts[1].effects, acts[1].preconditions))
+
+        acts = [self.no_ops[0], self.no_ops[0]]
+        self.assertFalse(self.action_layer._interference(*acts), chain_dedent("""
+            '{!s}' should NOT be mutually exclusive with itself by interference.
+            None of its effects {!s} negates any of its preconditions {!s}.
+        """, acts[0], acts[1], list(acts[0].effects), list(acts[1].preconditions)))
         
         acts = [self.actions[0], self.no_ops[1]]
         self.assertTrue(self.action_layer._interference(*acts), chain_dedent("""
             '{!s}' and '{!s}' should be mutually exclusive by interference.
             At least one of these effects {!s} negates one of these preconditions {!s}
             or one of these effects {!s} negates one of these preconditions {!s}.
-        """, acts[0], acts[1], acts[0].effects, acts[1].preconditions,
+        """, acts[0], acts[1], list(acts[0].effects), list(acts[1].preconditions),
         acts[1].effects, acts[1].preconditions))
 
         # interference mutexes are static -- if they appear in any layer,
