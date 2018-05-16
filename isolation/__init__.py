@@ -101,6 +101,7 @@ def _play(agents, game_state, time_limit, match_id):
     logger.info(GAME_INFO.format(initial_state, *agents))
     while not game_state.terminal_test():
         active_idx = game_state.ply_count % 2
+
         try:
             action = fork_get_action(game_state, players[active_idx], time_limit)
         except Empty:
@@ -154,10 +155,24 @@ def fork_get_action(game_state, active_player, time_limit):
     action_queue = Queue()
     listener, client = Pipe()
     active_player.queue = action_queue  # give the agent instance a threadsafe queue
+    
+    # comment out these lines for debugging mode
     p = Process(target=_request_action, args=(active_player, game_state, time_limit, client))
     p.start()
     p.join(timeout=PROCESS_TIMEOUT)
     if p and p.is_alive(): p.terminate()
+
+    # Uncomment these lines to run in debug mode, which runs the search function in the
+    # main process so that debuggers and profilers work properly. NOTE: calls to your
+    # search methods will NOT timeout in debug mode; you must be very careful to avoid
+    # calls that are not methods of your CustomPlayer class or else your agent may fail
+    #
+    # from copy import deepcopy
+    # active_player.queue = None
+    # active_player = deepcopy(active_player)
+    # active_player.queue = action_queue
+    # _request_action(active_player, game_state, time_limit, client)
+
     if listener.poll():
         active_player.context = listener.recv()  # preserve any internal state
     while True:  # treat the queue as LIFO
