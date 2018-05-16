@@ -34,7 +34,7 @@ class Action(IntEnum):
 _ACTIONSET = set(Action)  # used for efficient membership testing
 
 
-class Isolation(NamedTuple):
+class Isolation(NamedTuple('Isolation', [('board', int), ('ply_count', int), ('locs', int)])):
     """ Bitboard implementation of knight's Isolation game state
 
     Subclassing NamedTuple makes the states (effectively) immutable
@@ -56,9 +56,8 @@ class Isolation(NamedTuple):
         each player is None while the player has not yet placed their piece
         on the board; otherwise an integer.
     """
-    board : int = _BLANK_BOARD
-    ply_count : int = 0
-    locs : tuple = (None, None)
+    def __new__(cls, board=_BLANK_BOARD, ply_count=0, locs=(None, None)):
+        return super(Isolation, cls).__new__(cls, board, ply_count, locs)
 
     def actions(self):
         """ Return a list of the legal actions in the current state
