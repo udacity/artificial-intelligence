@@ -103,12 +103,17 @@ class PlanningGraph:
         that the level cost is **NOT** the minimum number of actions to
         achieve a single goal literal.
         
-        For example, if Goal1 first appears in level 0 of the graph (i.e.,
-        it is satisfied at the root of the planning graph) and Goal2 first
+        For example, if Goal_1 first appears in level 0 of the graph (i.e.,
+        it is satisfied at the root of the planning graph) and Goal_2 first
         appears in level 3, then the levelsum is 0 + 3 = 3.
 
-        Hint: expand the graph one level at a time and accumulate the level
-        cost of each goal.
+        Hints
+        -----
+          - See the pseudocode folder for help on a simple implementation
+          - You can implement this function more efficiently than the
+            sample pseudocode if you expand the graph one level at a time
+            and accumulate the level cost of each goal rather than filling
+            the whole graph at the start.
 
         See Also
         --------
@@ -129,7 +134,12 @@ class PlanningGraph:
         For example, if Goal1 first appears in level 1 of the graph and
         Goal2 first appears in level 3, then the levelsum is max(1, 3) = 3.
 
-        Hint: expand the graph one level at a time until all goals are met.
+        Hints
+        -----
+          - See the pseudocode folder for help on a simple implementation
+          - You can implement this function more efficiently if you expand
+            the graph one level at a time until the last goal is met rather
+            than filling the whole graph at the start.
 
         See Also
         --------
@@ -149,7 +159,12 @@ class PlanningGraph:
         appear such that no pair of goal literals are mutex in the last
         layer of the planning graph.
 
-        Hint: expand the graph one level at a time until you find the set level
+        Hints
+        -----
+          - See the pseudocode folder for help on a simple implementation
+          - You can implement this function more efficiently if you expand
+            the graph one level at a time until you find the set level rather
+            than filling the whole graph at the start.
 
         See Also
         --------
