@@ -185,10 +185,10 @@ class DebugState(Isolation):
     Examples
     --------
     >>> board = Isolation()
-    >>> debug_board = DebugBoard(board)
-    >>> print(db.bitboard_string)
+    >>> debug_board = DebugBoard.from_state(board)
+    >>> print(debug_board.bitboard_string)
     11111111111001111111111100111111111110011111111111001111111111100111111111110011111111111
-    >>> print(db)
+    >>> print(debug_board)
 
     + - + - + - + - + - + - + - + - + - + - + - +
     |   |   |   |   |   |   |   |   |   |   |   |
