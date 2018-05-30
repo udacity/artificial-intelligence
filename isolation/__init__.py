@@ -116,7 +116,7 @@ def _play(agents, game_state, time_limit, match_id):
             break
         except Exception as err:
             logger.error(ERR_INFO.format(
-                err, agents[0], agents[1], initial_state, game_state, game_history
+                err, initial_state, agents[0], agents[1], game_state, game_history
             ))
             winner = agents[1 - active_idx]
             break
