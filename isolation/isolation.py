@@ -74,7 +74,7 @@ class Isolation(NamedTuple('Isolation', [('board', int), ('ply_count', int), ('l
         loc = self.locs[self.player()]
         if loc is None:
             return self.liberties(loc)
-        return [a for a in Action if (a + loc) > 0 and (self.board & (1 << (a + loc)))]
+        return [a for a in Action if (a + loc) >= 0 and (self.board & (1 << (a + loc)))]
 
     def player(self):
         """ Return the id (zero for first player, one for second player) of player
