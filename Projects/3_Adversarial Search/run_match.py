@@ -45,7 +45,7 @@ def make_fair_matches(matches, results):
         match = matches[match_id]
         state = Isolation()
         state = state.result(game_history[0]).result(game_history[1])
-        new_matches.append((match[0][::-1], match[1], match[2], -match_id))
+        new_matches.append((match[0][::-1], state, match[2], -match_id))
     return new_matches
 
 
