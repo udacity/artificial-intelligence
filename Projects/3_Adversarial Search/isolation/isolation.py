@@ -214,6 +214,16 @@ class DebugState(Isolation):
     @property
     def bitboard_string(self): return "{:b}".format(self.board)
 
+    @classmethod
+    def ind2xy(cls, ind):
+        """ Convert from board index value to xy coordinates
+
+        The coordinate frame is 0 in the bottom right corner, with x increasing
+        along the columns progressing towards the left, and y increasing along
+        the rows progressing towards teh top.
+        """
+        return (ind % (_WIDTH + 2), ind // (_WIDTH + 2))
+
     def __str__(self):
         """ Generate a string representation of the current game state, marking
         the location of each player and indicating which cells have been blocked,
