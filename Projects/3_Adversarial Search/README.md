@@ -15,6 +15,8 @@ In knights Isolation, tokens can move to any open cell that is 2-rows and 1-colu
 
 Finally, agents have a fixed time limit (150 milliseconds by default) to search for the best move and respond.  The search will be automatically cut off after the time limit expires, and the active agent will forfeit the game if it has not chosen a move.
 
+**You can find more information (including implementation details) about the in the Isolation library readme [here](/isolation/README.md).**
+
 
 ## Getting Started (Workspaces)
 
@@ -52,10 +54,12 @@ def get_action(self, state):
 ```
 
 - **DO NOT** use multithreading/multiprocessing (the isolation library already uses them, which may cause conflicts)
-- **ALL** of the functions you add should be created as methods on the CustomPlayer class. 
+- **ALL** of the functions you add should be created as methods on the CustomPlayer class. Avoid nested classes & functions, especially for long-running procedures, as these may cause your agent to block the automatic timeout when your turn ends.
 
 #### Initialization Data
 Your agent will automatically read the contents of a file named `data.pickle` if it exists in the same folder as `my_custom_player.py`. The serialized object from the pickle file will be assigned to `self.data`. Your agent should not write to or modify the contents of the pickle file during search.
+
+The log file will record a warning message if there is no data file, however a data file is NOT required unless you need it for your opening book. (You are allowed to use the data file to provide _any_ initialization information to your agent; it is not limited to an opening book.)
 
 
 #### Saving Information Between Turns
@@ -67,7 +71,7 @@ def get_action(...):
     self.context = object_you_want_to_save  # self.context will contain this object on the next turn
 ```
 
-## Pick an Experiment
+## Choose an Experiment
 
 Select at least one of the following to implement and evaluate in your report. (There is no upper limit on the techniques you incorporate into your agent.)
 

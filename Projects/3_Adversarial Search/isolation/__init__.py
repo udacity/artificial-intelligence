@@ -5,6 +5,7 @@
 import inspect
 import logging
 import sys
+import textwrap
 import time
 
 from collections import namedtuple
@@ -69,7 +70,7 @@ class Countdown_Timer:  # Timer object used to monitor time spent on search
 def play(args): return _play(*args)  # multithreading ThreadPool.map doesn't expand args
 
 
-def _play(agents, game_state, time_limit, match_id):
+def _play(agents, game_state, time_limit, match_id, debug=False):
     """ Run a match between two agents by alternately soliciting them to
     select a move and applying it to advance the game state.
 
@@ -103,7 +104,7 @@ def _play(agents, game_state, time_limit, match_id):
         active_idx = game_state.ply_count % 2
 
         try:
-            action = fork_get_action(game_state, players[active_idx], time_limit)
+            action = fork_get_action(game_state, players[active_idx], time_limit, debug)
         except Empty:
             logger.info(
                 "{} get_action() method did not respond within {} milliseconds".format(
@@ -151,30 +152,36 @@ def _play(agents, game_state, time_limit, match_id):
     return winner, game_history, match_id
 
 
-def fork_get_action(game_state, active_player, time_limit):
+def fork_get_action(game_state, active_player, time_limit, debug=False):
     action_queue = Queue()
     listener, client = Pipe()
     active_player.queue = action_queue  # give the agent instance a threadsafe queue
-    
-    # comment out these lines for debugging mode
-    p = Process(target=_request_action, args=(active_player, game_state, time_limit, client))
-    p.start()
-    p.join(timeout=PROCESS_TIMEOUT)
-    if p and p.is_alive(): p.terminate()
-
-    # Uncomment these lines to run in debug mode, which runs the search function in the
-    # main process so that debuggers and profilers work properly. NOTE: calls to your
-    # search methods will NOT timeout in debug mode; you must be very careful to avoid
-    # calls that are not methods of your CustomPlayer class or else your agent may fail
-    #
-    # from copy import deepcopy
-    # active_player.queue = None
-    # active_player = deepcopy(active_player)
-    # active_player.queue = action_queue
-    # _request_action(active_player, game_state, time_limit, client)
-
-    if listener.poll():
-        active_player.context = listener.recv()  # preserve any internal state
+        
+    if debug:  # run the search in the main process and thread
+        from copy import deepcopy
+        active_player.queue = None
+        active_player = deepcopy(active_player)
+        active_player.queue = action_queue
+        _request_action(active_player, game_state, time_limit, client)
+    else:  # spawn a new process to run the search function
+        try:
+            p = Process(target=_request_action, args=(active_player, game_state, time_limit, client))
+            p.start()
+            p.join(timeout=PROCESS_TIMEOUT)
+            if listener.poll():
+                active_player.context = listener.recv()  # preserve any internal state
+            else:
+                raise TimeoutError(textwrap.dedent("""\
+                    Search process killed after {} seconds; your function should have stopped
+                    automatically after no more than {} milliseconds, but the automatic timeout
+                    could not interrupt your search function. Please make sure that you only
+                    call methods defined directly in the CustomPlayer class. Do NOT use nested
+                    classes or functions, and limit the use of functions defined outside the
+                    scope of the CustomPlayer class because that may cause your code to miss
+                    the timeout signal.
+                    """.format(PROCESS_TIMEOUT, time_limit)).replace("\n", " "))
+        finally:
+            if p and p.is_alive(): p.terminate()
     while True:  # treat the queue as LIFO
         action = action_queue.get_nowait()  # raises Empty if agent did not respond
         if action_queue.empty(): break
@@ -209,10 +216,9 @@ def _request_action(agent, game_state, time_limit, conn):
     """
     timer = Countdown_Timer(time_limit)
     agent = _wrap_timer(agent, timer)
-    timer.set_start_time(time.perf_counter())
-    # Catch StopSearch exceptions on timeout, but do not catch other exceptions
     try:
+        timer.set_start_time(time.perf_counter())
         agent.get_action(game_state)
     except StopSearch:
         pass
-    conn.send(agent.context) # pass updated agent back to calling process
+    conn.send(agent.context)
