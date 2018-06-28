@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 Agent = namedtuple("Agent", "agent_class name")
 
-PROCESS_TIMEOUT = 2  # time to interrupt agent search processes (in seconds)
+PROCESS_TIMEOUT = 5  # time to interrupt agent search processes (in seconds)
 GAME_INFO = """\
 Initial game state: {}
 First agent: {!s}
@@ -43,28 +43,48 @@ Loser: {}
 """
 
 class Status(Enum):
-    EXCEPTION = 0
-    TIMEOUT = 1
-    INVALID_MOVE = 2
-    GAME_OVER = 3
+    NORMAL = 0
+    EXCEPTION = 1
+    TIMEOUT = 2
+    INVALID_MOVE = 3
+    GAME_OVER = 4
 
 
 class StopSearch(Exception): pass  # Exception class used to halt search
 
 
-class Countdown_Timer:  # Timer object used to monitor time spent on search
-    def __init__(self, time_limit):
-        self.__time_limit = time_limit / 1000.
+class TimedQueue:
+    """Modified Queue class to block .put() after a time limit expires,
+    and to include both a context object & action choice in the queue.
+    """
+    def __init__(self, queue, time_limit):
+        self.__queue = queue
+        self.__time_limit = time_limit / 1000
         self.__stop_time = None
+        self.agent = None
 
-    def set_start_time(self, start_time):
-        self.__stop_time = self.__time_limit + start_time
+    def start_timer(self):
+        self.__stop_time = self.__time_limit + time.perf_counter()
 
-    def check_time(self):
-        return (self.__stop_time - time.perf_counter()) * 1000.
+    def put(self, item, block=True, timeout=None):
+        if self.__stop_time and time.perf_counter() > self.__stop_time:
+            raise StopSearch
+        if not self.__queue.empty():
+            self.__queue.get_nowait()
+        self.__queue.put_nowait((getattr(self.agent, "context", None), item))
 
-    def __call__(self):
-        return time.perf_counter() > self.__stop_time
+    def put_nowait(self, item):
+        self.__queue.put(item, False)
+
+    def get(block=True, timeout=None):
+        return self.__queue.get(block, timeout)
+
+    def get_nowait(self):
+        return self.__queue.get_nowait()
+
+    def qsize(self): return self.__queue.qsize()
+    def empty(self): return self.__queue.empty()
+    def full(self): return self.__queue.full()
 
 
 def play(args): return _play(*args)  # multithreading ThreadPool.map doesn't expand args
@@ -98,127 +118,77 @@ def _play(agents, game_state, time_limit, match_id, debug=False):
     initial_state = game_state
     game_history = []
     winner = None
+    status = Status.NORMAL
     players = [a.agent_class(player_id=i) for i, a in enumerate(agents)]
     logger.info(GAME_INFO.format(initial_state, *agents))
     while not game_state.terminal_test():
-        active_idx = game_state.ply_count % 2
+        active_idx = game_state.player()
+
+        # any problems during get_action means the active player loses
+        winner, loser = agents[1 - active_idx], agents[active_idx]
 
         try:
             action = fork_get_action(game_state, players[active_idx], time_limit, debug)
         except Empty:
-            logger.info(
-                "{} get_action() method did not respond within {} milliseconds".format(
-                    agents[active_idx], time_limit
-            ))
-            logger.info(RESULT_INFO.format(
-                Status.TIMEOUT, game_state, game_history, agents[1 - active_idx], agents[active_idx]
-            ))
-            winner = agents[1 - active_idx]
+            status = Status.TIMEOUT
+            logger.warn(textwrap.dedent("""\
+                The queue was empty after get_action() was called. This means that either
+                the queue.put() method was not called by the get_action() method, or that
+                the queue was empty after the procedure was killed due to timeout {} seconds
+                after the move time limit of {} milliseconds had expired.
+                """.format(players[active_idx], PROCESS_TIMEOUT, time_limit)).replace("\n", " "))
             break
         except Exception as err:
+            status = Status.EXCEPTION
             logger.error(ERR_INFO.format(
                 err, initial_state, agents[0], agents[1], game_state, game_history
             ))
-            winner = agents[1 - active_idx]
             break
 
         if action not in game_state.actions():
-            logger.info(RESULT_INFO.format(
-                Status.INVALID_MOVE, game_state, game_history, agents[1 - active_idx], agents[active_idx]
-            ))
-            winner = agents[1 - active_idx]
+            status = Status.INVALID_MOVE
             break
 
         game_state = game_state.result(action)
         game_history.append(action)
-
-    if winner is not None:  # Timeout, invalid move, or unknown exception
-        pass
-    elif game_state.utility(active_idx) > 0:
-        logger.info(RESULT_INFO.format(
-            Status.GAME_OVER, game_state, game_history, agents[active_idx], agents[1 - active_idx]
-        ))
-        winner = agents[active_idx]
-    elif game_state.utility(1 - active_idx) > 0:
-        logger.info(RESULT_INFO.format(
-            Status.GAME_OVER, game_state, game_history, agents[1 - active_idx], agents[active_idx]
-        ))
-        winner = agents[1 - active_idx]
     else:
-        raise RuntimeError(("A game ended without a winner.\n" +
-            "initial game: {}\nfinal game: {}\naction history: {}\n").format(
-                initial_state, game_state, game_history))
+        status = Status.GAME_OVER
+        if game_state.utility(active_idx) > 0:
+            winner, loser = loser, winner  # swap winner/loser if active player won
 
+    logger.info(RESULT_INFO.format(status, game_state, game_history, winner, loser))
     return winner, game_history, match_id
 
 
 def fork_get_action(game_state, active_player, time_limit, debug=False):
-    action_queue = Queue()
-    listener, client = Pipe()
-    active_player.queue = action_queue  # give the agent instance a threadsafe queue
-        
+    action_queue = TimedQueue(Queue(), time_limit)
     if debug:  # run the search in the main process and thread
         from copy import deepcopy
         active_player.queue = None
         active_player = deepcopy(active_player)
         active_player.queue = action_queue
-        _request_action(active_player, game_state, time_limit, client)
+        _request_action(active_player, action_queue, game_state)
+        time.sleep(time_limit / 1000)
     else:  # spawn a new process to run the search function
         try:
-            p = Process(target=_request_action, args=(active_player, game_state, time_limit, client))
+            p = Process(target=_request_action, args=(active_player, action_queue, game_state))
             p.start()
-            p.join(timeout=PROCESS_TIMEOUT)
-            if listener.poll():
-                active_player.context = listener.recv()  # preserve any internal state
-            else:
-                raise TimeoutError(textwrap.dedent("""\
-                    Search process killed after {} seconds; your function should have stopped
-                    automatically after no more than {} milliseconds, but the automatic timeout
-                    could not interrupt your search function. Please make sure that you only
-                    call methods defined directly in the CustomPlayer class. Do NOT use nested
-                    classes or functions, and limit the use of functions defined outside the
-                    scope of the CustomPlayer class because that may cause your code to miss
-                    the timeout signal.
-                    """.format(PROCESS_TIMEOUT, time_limit)).replace("\n", " "))
+            p.join(timeout=PROCESS_TIMEOUT + time_limit / 1000)
         finally:
             if p and p.is_alive(): p.terminate()
-    while True:  # treat the queue as LIFO
-        action = action_queue.get_nowait()  # raises Empty if agent did not respond
-        if action_queue.empty(): break
+    new_context, action = action_queue.get_nowait()  # raises Empty if agent did not respond
+    active_player.context = new_context
     return action
 
 
-def _callable(member):
-    return inspect.ismethod(member) or inspect.isfunction(member)
-
-
-def _timeout(func, timer):
-    """ Decorator to check for timeout each time a function is called """
-    def _func(*args, **kwargs):
-        if timer(): raise StopSearch
-        return func(*args, **kwargs)
-    return _func
-
-
-def _wrap_timer(obj, timer):
-    """ Wrap each method of an object with a timeout test """
-    for name, method in inspect.getmembers(obj, _callable):
-        setattr(obj, name, _timeout(method, timer))
-    return obj
-
-
-def _request_action(agent, game_state, time_limit, conn):
+def _request_action(agent, queue, game_state):
     """ Augment agent instances with a countdown timer on every method before
     calling the get_action() method and catch countdown timer exceptions.
-
-    Wrapping the methods must happen here because the wrapped methods cannot
-    be passed between processes 
     """
-    timer = Countdown_Timer(time_limit)
-    agent = _wrap_timer(agent, timer)
+    agent.queue = queue
+    queue.agent = agent
     try:
-        timer.set_start_time(time.perf_counter())
+        queue.start_timer()
         agent.get_action(game_state)
     except StopSearch:
         pass
-    conn.send(agent.context)
