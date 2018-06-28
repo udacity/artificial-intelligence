@@ -53,8 +53,7 @@ def get_action(self, state):
     self.queue.put(random.choice(state.actions()))
 ```
 
-- **DO NOT** use multithreading/multiprocessing (the isolation library already uses them, which may cause conflicts)
-- **ALL** of the functions you add should be created as methods on the CustomPlayer class. Avoid nested classes & functions, especially for long-running procedures, as these may cause your agent to block the automatic timeout when your turn ends.
+- **DO NOT** use multithreading/multiprocessing (the isolation library already uses them, so using them in your agent may cause conflicts)
 
 #### Initialization Data
 Your agent will automatically read the contents of a file named `data.pickle` if it exists in the same folder as `my_custom_player.py`. The serialized object from the pickle file will be assigned to `self.data`. Your agent should not write to or modify the contents of the pickle file during search.
