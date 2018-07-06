@@ -51,7 +51,7 @@ def naked_twins(values):
     See Also
     --------
     Pseudocode for this algorithm on github:
-    https://github.com/udacity/artificial-intelligence/blob/master/Projects/1_Sudoku/solution.py
+    https://github.com/udacity/artificial-intelligence/blob/master/Projects/1_Sudoku/pseudocode.md
     """
     # TODO: Implement this function!
     raise NotImplementedError
