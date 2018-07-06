@@ -10,15 +10,17 @@ Read more [here](/Exercises/1_Constraint%20Satisfaction)
 
 ### 2. Classical Search for PacMan (only in classroom)
 
+**Please DO NOT publish your work on this exercise.**
+
 In this exercise you will teach Pac-Man to search his world to complete the following tasks:
 * find a single obstacle
 * find multiple obstacles
 * find the fastest way to eat all the food in the map
 
 
-### 3. Optimization
+### 3. Local Search Optimization
 
-In this exercise you will apply optimization techniques from lectures on various example problems.
+In this exercise, you'll implement several local search algorithms and test them on the [Traveling Salesman Problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem) (TSP) between a few dozen US state capitals.
 
 
 ## Projects
@@ -36,6 +38,9 @@ Read more [here](/Projects/2_Classical%20Planning)
 
 
 ### 3. Game Playing
+In this project you will choose an experiment with adversarial game-playing techniques like minimax, Monte Carlo tree search, opening books, and more. Your goal will be to build and evaluate the performance of your agent in a finite deterministic two player game of perfect information called Isolation.
+
+Read more [here](/Projects/3_Adversarial%20Search)
 
 
 ### 4. Part of Speech Tagger
