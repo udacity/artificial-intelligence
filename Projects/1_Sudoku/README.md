@@ -17,11 +17,13 @@ In this project, you will extend the Sudoku-solving agent developed in the class
 
     `(aind)$ python -m unittest -v`
 
-3. Once you pass all the test cases in the local test suite, you can submit the project to run more comprehensive tests with the remote test suite:
+3. Copy your code from the classroom for the search and basic strategies, then add the diagonal units at the top of the solutions.py file and complete the `naked_twins()` function.  Pseudocode for the `naked_twins()` function is available [here](https://github.com/udacity/artificial-intelligence/blob/master/Projects/1_Sudoku/solution.py).
+
+4. Run the test suite again to check your progress. Once you pass all the test cases in the local test suite, you can submit the project to run more comprehensive tests with the remote test suite:
 
     `(aind)$ udacity submit`
 
-4. You can run the code with visualization (see the last section of the readme for more information)
+5. You can run the code with visualization (see the last section of the readme for more information)
 
     `(aind)$ python solution.py`
 
@@ -35,7 +37,7 @@ In this project, you will extend the Sudoku-solving agent developed in the class
 
 ## Instructions
 
-You must complete the required functions in the 'solution.py' file (copy in code from the classroom where indicated, and add or extend with new code as described below). The `test_solution.py` file includes a few unit tests for local testing (See the [unittest module]() documentation for more information on getting started.), but the primary mechanism for testing your code is the Udacity Project Assistant command line utility described in the next section.
+You must complete the required functions in the 'solution.py' file (copy in code from the classroom where indicated, and add or extend with new code as described below). The `test_solution.py` file includes a few unit tests for local testing, but the primary mechanism for testing your code is the Udacity Project Assistant command line utility described in the next section.
 
 YOU SHOULD EXPECT TO MODIFY OR WRITE YOUR OWN UNIT TESTS AS PART OF COMPLETING THIS PROJECT. There is no requirement to write test cases, but the Project Assistant test suite is not shared with students so writing your own tests may be necessary to find and resolve any errors that arise there.
 
@@ -43,7 +45,7 @@ YOU SHOULD EXPECT TO MODIFY OR WRITE YOUR OWN UNIT TESTS AS PART OF COMPLETING T
 
 1. Copy your code from the classroom for the `eliminate()`, `only_choice()`, `reduce_puzzle()`, and `search()` into the corresponding functions in the `solution.py` file.
 
-1. Implement the `naked_twins()` function, and update `reduce_puzzle()` to call it (along with the other existing strategies). Re-run the local tests with `python -m unittest -v` to confirm your solution.
+1. Implement the `naked_twins()` function (see the pseudocode [here](https://github.com/udacity/artificial-intelligence/blob/master/Projects/1_Sudoku/solution.py) for help), and update `reduce_puzzle()` to call it (along with the other existing strategies). Re-run the local tests with `python -m unittest -v` to confirm your solution.
 
 1. Run the remote tests with `udacity submit` to confirm your solution. If any of the remote test cases fail, use the feedback to write your own local test cases for debugging.
 
@@ -55,13 +57,6 @@ To submit your code, run `udacity submit` from a terminal in the top-level direc
 The Udacity-PA CLI tool is automatically installed with the AIND conda environment provided in the classroom, but you can also install it manually by running `pip install udacity-pa`. You can submit your code for scoring by running `udacity submit`. The project assistant server has a collection of unit tests that it will execute on your code, and it will provide feedback on any successes or failures. You must pass all test cases in the project assistant to pass the project.
 
 Once your project passes all test cases on the Project Assistant, submit the zip file created by the `udacity submit` command in the classroom to automatically receive credit for the project. NOTE: You will not receive personalized feedback for this project on submissions that pass all test cases, however, all other projects in the term do provide personalized feedback on both passing & failing submissions.
-
-
-## Troubleshooting
-
-Your classroom mentor may be able to provide some guidance on the project, but the [slack community](https://a-ind.slack.com) should be your primary support resources. Instructors hold regularly scheduled office hours in the Slack community. (The schedule is posted in the description of the #office-hours channel.)
-
-Contact ai-support@udacity.com if you don't have access to the Slack community.
 
 
 ## Visualization
