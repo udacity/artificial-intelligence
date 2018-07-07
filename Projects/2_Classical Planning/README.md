@@ -30,17 +30,26 @@ If you would prefer to complete the exercise in your own local environment, then
 $ source activate aind
 ```
 
-## Completing the Project
+## Instructions
 
-1. Make sure that everything is working by running the example problem (based on the cake problem from Fig 10.7 in Chapter 10.3 of AIMA ed3). The script will print information about the problem domain and solve it with several different search algorithms.
+1. Start by running the example problem (this example implements the "have cake" problem from Fig 10.7 of AIMA 3rd edition). The script will print information about the problem domain and solve it with several different search algorithms, however these algorithms cannot solve larger, more complex problems so next you'll have to implement a few more sophisticated heuristics.
 ```
 $ python example_have_cake.py
 ```
 
-2. Complete all TODO sections in `my_planning_graph.py`. You should refer to the [heuristics pseudocode](pseudocode/heuristics.md), chapter 10 of AIMA 3rd edition or chapter 11 of AIMA 2nd edition (available [on the AIMA book site](http://aima.cs.berkeley.edu/2nd-ed/newchap11.pdf)) and the detailed instructions inline with each TODO statement. Test your code for this module by running:
-```
-$ python -m unittest -v
-```
+2. Open `my_planning_graph.py` and complete the TODO sections. Refer to the heuristics pseudocode [here](pseudocode/heuristics.md), chapter 10 of AIMA 3rd edition or chapter 11 of AIMA 2nd edition (available [on the AIMA book site](http://aima.cs.berkeley.edu/2nd-ed/newchap11.pdf)) and the detailed instructions inline with each TODO statement for help. You should implement the following functions:
+
+  - `ActionLayer._inconsistent_effects`
+  - `ActionLayer._interference`
+  - `ActionLayer._competing_needs`
+  - `LiteralLayer._inconsistent_support`
+  - `LiteralLayer._negation`
+  - `PlanningGraph.h_levelsum`
+  - `PlanningGraph.h_maxlevel`
+  - `PlanningGraph.h_setlevel`
+
+After you complete each function, test your solution by running `python -m unittest -v`. **YOU SHOULD PASS EACH TEST CASE IN ORDER.** Some of the later test cases depend on correctly implementing the earlier functions, so working on the test cases out of order will be more difficult.
+
 
 3. Experiment with different search algorithms using the `run_search.py` script. (See example usage below.) The goal of your experiment is to understand the tradeoffs in speed, optimality, and complexity of progression search as problem size increases. You will record your results in a report (described below in [Report Requirements](#report-requirements)).
 
@@ -54,7 +63,8 @@ $ python run_search.py -m
 $ python run_search.py -p 1 2 -s 1 2
 ```
 
-## Experiment Details
+
+### Experiment with the planning algorithms
 
 The `run_search.py` script allows you to choose any combination of eleven search algorithms (three uninformed and eight with heuristics) on four air cargo problems. The cargo problem instances have different numbers of airplanes, cargo items, and airports that increase the complexity of the domains.
 
