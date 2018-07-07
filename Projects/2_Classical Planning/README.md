@@ -37,7 +37,7 @@ $ source activate aind
 $ python example_have_cake.py
 ```
 
-2. Open `my_planning_graph.py` and complete the TODO sections. Refer to the heuristics pseudocode [here](pseudocode/heuristics.md), chapter 10 of AIMA 3rd edition or chapter 11 of AIMA 2nd edition (available [on the AIMA book site](http://aima.cs.berkeley.edu/2nd-ed/newchap11.pdf)) and the detailed instructions inline with each TODO statement for help. You should implement the following functions:
+2. Open `my_planning_graph.py` and complete the TODO sections. Documentation for the planning graph classes is provided in the docstrings and examples [here](examples.md). Refer to the heuristics pseudocode [here](pseudocode/heuristics.md), chapter 10 of AIMA 3rd edition or chapter 11 of AIMA 2nd edition (available [on the AIMA book site](http://aima.cs.berkeley.edu/2nd-ed/newchap11.pdf)) and the detailed instructions inline with each TODO statement for help. You should implement the following functions:
 
   - `ActionLayer._inconsistent_effects`
   - `ActionLayer._interference`

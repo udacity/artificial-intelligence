@@ -11,6 +11,10 @@ class ActionLayer(BaseActionLayer):
     def _inconsistent_effects(self, actionA, actionB):
         """ Return True if an effect of one action negates an effect of the other
 
+        Hints:
+            (1) `~Literal` can be used to logically negate a literal
+            (2) `self.children` contains a map from actions to effects
+
         See Also
         --------
         layers.ActionNode
@@ -21,6 +25,10 @@ class ActionLayer(BaseActionLayer):
 
     def _interference(self, actionA, actionB):
         """ Return True if the effects of either action negate the preconditions of the other 
+
+        Hints:
+            (1) `~Literal` can be used to logically negate a literal
+            (2) `self.parents` contains a map from actions to preconditions
         
         See Also
         --------
@@ -31,6 +39,10 @@ class ActionLayer(BaseActionLayer):
 
     def _competing_needs(self, actionA, actionB):
         """ Return True if any preconditions of the two actions are pairwise mutex in the parent layer
+
+        Hints:
+            (1) `self.parent_layer` contains a reference to the previous literal layer
+            (2) `self.parents` contains a map from actions to preconditions
         
         See Also
         --------
@@ -45,6 +57,10 @@ class LiteralLayer(BaseLiteralLayer):
 
     def _inconsistent_support(self, literalA, literalB):
         """ Return True if all ways to achieve both literals are pairwise mutex in the parent layer
+
+        Hints:
+            (1) `self.parent_layer` contains a reference to the previous action layer
+            (2) `self.parents` contains a map from literals to actions in the parent layer
 
         See Also
         --------
@@ -109,11 +125,11 @@ class PlanningGraph:
 
         Hints
         -----
-          - See the pseudocode folder for help on a simple implementation
-          - You can implement this function more efficiently than the
-            sample pseudocode if you expand the graph one level at a time
-            and accumulate the level cost of each goal rather than filling
-            the whole graph at the start.
+          (1) See the pseudocode folder for help on a simple implementation
+          (2) You can implement this function more efficiently than the
+              sample pseudocode if you expand the graph one level at a time
+              and accumulate the level cost of each goal rather than filling
+              the whole graph at the start.
 
         See Also
         --------
@@ -136,10 +152,10 @@ class PlanningGraph:
 
         Hints
         -----
-          - See the pseudocode folder for help on a simple implementation
-          - You can implement this function more efficiently if you expand
-            the graph one level at a time until the last goal is met rather
-            than filling the whole graph at the start.
+          (1) See the pseudocode folder for help on a simple implementation
+          (2) You can implement this function more efficiently if you expand
+              the graph one level at a time until the last goal is met rather
+              than filling the whole graph at the start.
 
         See Also
         --------
@@ -161,10 +177,10 @@ class PlanningGraph:
 
         Hints
         -----
-          - See the pseudocode folder for help on a simple implementation
-          - You can implement this function more efficiently if you expand
-            the graph one level at a time until you find the set level rather
-            than filling the whole graph at the start.
+          (1) See the pseudocode folder for help on a simple implementation
+          (2) You can implement this function more efficiently if you expand
+              the graph one level at a time until you find the set level rather
+              than filling the whole graph at the start.
 
         See Also
         --------
