@@ -31,7 +31,7 @@ class DataPlayer(BasePlayer):
             with open("data.pickle", "rb") as f:
                 self.data = pickle.load(f)
         except (IOError, TypeError) as e:
-            logger.warn(str(e))
+            logger.info(str(e))
             self.data = None
 
 
