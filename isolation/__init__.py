@@ -69,18 +69,20 @@ class TimedQueue:
     def put(self, item, block=True, timeout=None):
         if self.__stop_time and time.perf_counter() > self.__stop_time:
             raise StopSearch
-        if not self.__queue.empty():
+        try:
             self.__queue.get_nowait()
+        except Empty:
+            pass
         self.__queue.put_nowait((getattr(self.agent, "context", None), item))
 
     def put_nowait(self, item):
-        self.__queue.put(item, False)
+        self.put(item, block=False)
 
-    def get(block=True, timeout=None):
-        return self.__queue.get(block, timeout)
+    def get(self, block=True, timeout=None):
+        return self.__queue.get(block=block, timeout=timeout)
 
     def get_nowait(self):
-        return self.__queue.get_nowait()
+        return self.get(block=False)
 
     def qsize(self): return self.__queue.qsize()
     def empty(self): return self.__queue.empty()
