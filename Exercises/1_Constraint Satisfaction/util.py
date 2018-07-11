@@ -67,7 +67,7 @@ def displayBoard(locations, shape):
 
     fig = plt.gcf()
     fig.set_size_inches([r, c])
-    scale = fig.get_dpi() / max(img.shape)
+    scale = 0.75 * fig.get_dpi() / max(img.shape)
     ax = plt.gca()
     for y, x in set(locations):
         box = mpl.offsetbox.OffsetImage(img, zoom=scale)
