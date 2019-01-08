@@ -119,7 +119,7 @@ with open("data.pickle", 'wb') as f:
 **Hints:**
 - If the results are very close, try increasing the number of matches (e.g., >100) to increase your confidence in the results
 - Experiment with adding more search time--does adding time confer any advantage to your agent?
-- Augment the code to count the nubmer of nodes your agent searches--does your agent have an advantage compared to the baseline search algorithm you chose?
+- Augment the code to count the number of nodes your agent searches--does your agent have an advantage compared to the baseline search algorithm you chose?
 
 **Note:**
 - You MAY implement advanced techniques from the reading list at the end of the lesson (like Monte Carlo Tree Search, principle variation search, etc.), but your agent is being evaluated for _performance_ rather than _correctness_. It's possible to pass the project requirements **without** using these advanced techniques, so project reviewers may encourage you to implement a simpler solution if you are struggling with correct implementation. (That's good general advice: do the simplest thing first, and only add complexity when you must.)
