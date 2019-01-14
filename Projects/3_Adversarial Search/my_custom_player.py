@@ -44,3 +44,24 @@ class CustomPlayer(DataPlayer):
         #          (the timer is automatically managed for you)
         import random
         self.queue.put(random.choice(state.actions()))
+
+    # Principal variation search based on Wikipedia pseudocode
+    def pvsearch(self, state, depth, alpha, beta, color):
+        if depth == 0 or state.terminal_test():
+            return state.utility(self.player_id) * color
+
+        for i, action in enumerate(state.actions()):
+            if i == 1:
+                value = -pvsearch(state.result(action), depth - 1, -alpha, -beta, -color)
+            else:
+                value = -pvsearch(state.result(action), depth - 1, -alpha - 1, -alpha, -color) # Null window search
+
+                if alpha < value < beta:
+                    value = -pvsearch(state.result(action), depth - 1, -beta, -value, -color) # Failed high, re-search
+
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break # Beta cut-off
+
+        return alpha
+
