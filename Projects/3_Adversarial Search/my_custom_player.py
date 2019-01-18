@@ -1,4 +1,6 @@
 from copy import deepcopy
+
+import gc
 import math
 import pandas as pd
 import pdb
@@ -11,17 +13,14 @@ from sample_players import DataPlayer
 
 class CustomPlayer(DataPlayer):
     """ Implement your own agent to play knight's Isolation
-
     The get_action() method is the only required method for this project.
     You can modify the interface for get_action by adding named parameters
     with default values, but the function MUST remain compatible with the
     default interface.
-
     **********************************************************************
     NOTES:
     - The test cases will NOT be run on a machine with GPU access, nor be
       suitable for using any other machine learning techniques.
-
     - You can pass state forward to your agent on the next turn by assigning
       any pickleable object to the self.context attribute.
     **********************************************************************
@@ -29,13 +28,10 @@ class CustomPlayer(DataPlayer):
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
         available in the current state calls self.queue.put(ACTION) at least
-
         This method must call self.queue.put(ACTION) at least once, and may
         call it as many times as you want; the caller will be responsible
         for cutting off the function after the search time limit has expired.
-
         See RandomPlayer and GreedyPlayer in sample_players for more examples.
-
         **********************************************************************
         NOTE: 
         - The caller is responsible for cutting off search, so calling
@@ -49,18 +45,21 @@ class CustomPlayer(DataPlayer):
         # EXAMPLE: choose a random move without any search--this function MUST
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
+
         next_action, df = self.uct_search(state)
+
         # Serialize the dataframe for the next turn
-        self.context = df
-        self.queue.put(random.choice(state.actions))
+        # self.context = df
+        sys.stdout.write("%s, %s\n" % (state.board, next_action))
+        self.queue.put(next_action)
 
 
     def uct_search(self, state):
         # Serializable data frame
-        if self.context:
-            df = self.context
-        else:
-            df = pd.DataFrame(columns=['state', 'action', 'utility', 'visit'])
+        # if self.context:
+        #     df = self.context
+        # else:
+        df = pd.DataFrame(columns=['state', 'action', 'utility', 'visit'])
 
         start_time = time.time()
         i = 1
@@ -76,7 +75,8 @@ class CustomPlayer(DataPlayer):
             untried = [a for a in state.actions() if a not in df.loc[df['state'] == state, 'action']]
 
             if len(untried) > 0:
-                return expand(state, untried[0])
+                action = random.choice(untried)
+                return expand(state, action)
             else:
                 tmp_state = tree_policy(state.result(best_child(state, 1)))
                 return tmp_state
@@ -94,9 +94,9 @@ class CustomPlayer(DataPlayer):
             c value between 0 (max score) and 1 (prioritize exploration)
             """
             cs_df = deepcopy(df[df['state'] == state])
-            cs_df['score'] = float(cs_df['utility']/cs_df['visit']) + float(c * math.sqrt((2 * math.log(i)/cs_df['visit'])))
-
-            next_action = cs_df.iloc[df['score'].idxmax, 'action']
+            cs_df['score'] = cs_df['utility']/cs_df['visit'] + cs_df['visit'].apply(lambda x: c * math.sqrt(2 * math.log(i)/x))
+            cs_df['score'] = cs_df['score'].astype('float')
+            next_action = cs_df.loc[cs_df['score'].idxmax(), 'action']
             tp.loc[len(tp)] = [state, next_action, 0, 1]
 
             return next_action
@@ -142,7 +142,9 @@ class CustomPlayer(DataPlayer):
         action = random.choice(state.actions())
         delta = default_policy(state.result(action))
         df.loc[len(df)] = [state, action, delta, 1]
-        while time.time() - start_time < 1:
+
+        while time.time() - start_time < 0.15:
+            gc.collect()
             # Temporal data frame
             tp = pd.DataFrame(columns=['state', 'action', 'utility', 'visit'])
 
@@ -151,15 +153,8 @@ class CustomPlayer(DataPlayer):
                 delta = default_policy(next_state)
                 df = backup_negamax(delta, df)
                 i += 1
-                pdb.set_trace()
             else:
                 # No point looping further if terminal state is hit
                 # May explore the possibility of injecting some randomness here
                 break
-
         return best_child(state, 0), df
-
-
-
-
-
