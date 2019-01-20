@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 import gc
+import logging
 import math
 import pandas as pd
 import pdb
@@ -25,6 +26,8 @@ class CustomPlayer(DataPlayer):
       any pickleable object to the self.context attribute.
     **********************************************************************
     """
+    logging.basicConfig(filename='MCTS.log',level=logging.DEBUG)
+
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
         available in the current state calls self.queue.put(ACTION) at least
@@ -47,20 +50,15 @@ class CustomPlayer(DataPlayer):
         #          (the timer is automatically managed for you)
 
         next_action, df = self.uct_search(state)
-
-        # Serialize the dataframe for the next turn
-        # self.context = df
-        sys.stdout.write("%s, %s\n" % (state.board, next_action))
+        self.context = df
         self.queue.put(next_action)
+
+        logging.info("%s\n" % (state.ply_count))
+        logging.info(str(df))
+
 
 
     def uct_search(self, state):
-        # Serializable data frame
-        # if self.context:
-        #     df = self.context
-        # else:
-        df = pd.DataFrame(columns=['state', 'action', 'utility', 'visit'])
-
         start_time = time.time()
         i = 1
 
@@ -72,20 +70,20 @@ class CustomPlayer(DataPlayer):
                 return state
 
             # Unexplored nodes get priority
-            untried = [a for a in state.actions() if a not in df.loc[df['state'] == state, 'action']]
+            untried = [a for a in state.actions() if a not in df.loc[df['board'] == str(state.board), 'action']]
 
             if len(untried) > 0:
                 action = random.choice(untried)
                 return expand(state, action)
             else:
-                tmp_state = tree_policy(state.result(best_child(state, 1)))
-                return tmp_state
+                state = tree_policy(state.result(best_child(state, 1)))
+                return state
 
         def expand(state, action):
             """
             Returns a state resulting from taking an action from the list of untried nodes
             """
-            tp.loc[len(tp)] = [state, action, 0, 1]
+            tp.loc[len(tp)] = [str(state.board), state.ply_count, state.locs, action, 0, 1]
             return state.result(action)
 
         def best_child(state, c):
@@ -93,11 +91,11 @@ class CustomPlayer(DataPlayer):
             Returns the state resulting from taking the best action
             c value between 0 (max score) and 1 (prioritize exploration)
             """
-            cs_df = deepcopy(df[df['state'] == state])
+            cs_df = deepcopy(df[df['board'] == str(state.board)])
             cs_df['score'] = cs_df['utility']/cs_df['visit'] + cs_df['visit'].apply(lambda x: c * math.sqrt(2 * math.log(i)/x))
             cs_df['score'] = cs_df['score'].astype('float')
             next_action = cs_df.loc[cs_df['score'].idxmax(), 'action']
-            tp.loc[len(tp)] = [state, next_action, 0, 1]
+            tp.loc[len(tp)] = [str(state.board), state.ply_count, state.locs, next_action, 0, 1]
 
             return next_action
 
@@ -134,27 +132,36 @@ class CustomPlayer(DataPlayer):
                 tp.loc[tp.index % 2 == 1, 'utility'] = -delta
             
             # Update the serializable data frame
-            df = df.set_index(['state', 'action']).add(tp.set_index(['state', 'action']), fill_value=0).reset_index()
+            df = df.set_index(['board', 'plycount', 'locs', 'action']).add(tp.set_index(['board', 'plycount', 'locs', 'action']), fill_value=0).reset_index()
             return df
 
         # In the absence of an opening book, pick a random opening move
         # Need to do this to populate df with at least one row
-        action = random.choice(state.actions())
-        delta = default_policy(state.result(action))
-        df.loc[len(df)] = [state, action, delta, 1]
+        if self.context is not None:
+            df = self.context
+        else:
+            df = pd.DataFrame(columns=['board', 'plycount', 'locs', 'action', 'utility', 'visit'])
+            action = random.choice(state.actions())
+            next_state = state.result(action)
+            delta = default_policy(next_state)
+            df.loc[len(df)] = [str(state.board), state.ply_count, state.locs, action, delta, 1]
+            i += 1
 
-        while time.time() - start_time < 0.15:
+        tp = pd.DataFrame(columns=['board', 'plycount', 'locs', 'action', 'utility', 'visit'])
+        # while time.time() - start_time < 0.7:
+        while time.time() - start_time < 0.7:
             gc.collect()
             # Temporal data frame
-            tp = pd.DataFrame(columns=['state', 'action', 'utility', 'visit'])
-
+            tp = pd.DataFrame(columns=['board', 'plycount', 'locs', 'action', 'utility', 'visit'])
             next_state = tree_policy(state)
-            if not next_state.terminal_test():
+
+            if not state.terminal_test():
                 delta = default_policy(next_state)
                 df = backup_negamax(delta, df)
-                i += 1
             else:
                 # No point looping further if terminal state is hit
                 # May explore the possibility of injecting some randomness here
                 break
+            i += 1
+
         return best_child(state, 0), df
