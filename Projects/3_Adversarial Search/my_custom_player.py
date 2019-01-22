@@ -1,10 +1,10 @@
 import gc
-import logging
+# import logging
 import math
 import pandas as pd
-import pdb
+# import pdb
 import random
-import sys
+# import sys
 
 
 from sample_players import DataPlayer
@@ -24,7 +24,7 @@ class CustomPlayer(DataPlayer):
       any pickleable object to the self.context attribute.
     **********************************************************************
     """
-    logging.basicConfig(filename='matches.log',level=logging.DEBUG)
+    # logging.basicConfig(filename='matches.log',level=logging.DEBUG)
 
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
