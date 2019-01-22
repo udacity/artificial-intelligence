@@ -1,14 +1,11 @@
-from copy import deepcopy
-
 import gc
 import logging
 import math
 import pandas as pd
-import pickle
 import pdb
 import random
 import sys
-import time
+
 
 from sample_players import DataPlayer
 
@@ -49,32 +46,44 @@ class CustomPlayer(DataPlayer):
         # EXAMPLE: choose a random move without any search--this function MUST
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
-        df = self.data
-        next_action, df = self.uct_search(state, df)
-        self.queue.put(next_action)
-        with open('data.pickle', 'wb') as f:
-            pickle.dump(df, f)
-        sys.stdout.write("%s - %s \n" % (state.ply_count, state.result(next_action).locs))
-
-
-    def uct_search(self, state, df):
-        start_time = time.time()
         i = 1
+        df = pd.DataFrame(columns=['board', 'plycount', 'locs', 'action', 'utility', 'visit', 'nround', 'score'])
+        plyturn = state.ply_count % 2
+        # Just to prevent a forfeit due to a no-action!
+        self.queue.put(random.choice(state.actions()))
 
+        while True:
+            next_action, df = self.uct_search(state, df, i, plyturn)
+            self.queue.put(next_action)
+            # logging.info("Play %s, Round %s\n" % (state.ply_count, i))
+            # logging.info("Selected action: %s\n" % next_action)
+            # logging.info(str(df))
+            # logging.info("\n-------------------------------------------------\n\n")
+            gc.collect()
+            i += 1
+
+
+    def uct_search(self, state, df, i, plyturn):
         def tree_policy(state):
             """
             Determine the most urgent node to expand - balancing areas not explored and areas that look promising
             """
+            # logging.debug("Executing tree policy")
             if state.terminal_test():
                 return state
 
             # Unexplored nodes get priority
-            untried = [a for a in state.actions() if a not in df.loc[df['board'] == str(state.board), 'action']]
+            untried = [a for a in state.actions() if a not in list(df.loc[df['board'] == str(state.board), 'action'])]
 
             if len(untried) > 0:
                 action = random.choice(untried)
                 return expand(state, action)
             else:
+                next_action = best_child(state, 1)
+                # Update the visit and round statistics
+                df.loc[(df['board'] == str(state.board)) & (df['action'] == next_action), 'visit'] += 1
+                # Mark the path taken for the current round of iteration
+                df.loc[(df['board'] == str(state.board)) & (df['action'] == next_action), 'nround'] = i
                 state = tree_policy(state.result(best_child(state, 1)))
                 return state
 
@@ -82,6 +91,7 @@ class CustomPlayer(DataPlayer):
             """
             Returns a state resulting from taking an action from the list of untried nodes
             """
+            # logging.debug("Expanding untried nodes")
             df.loc[len(df)] = [str(state.board), state.ply_count, state.locs, action, 0, 1, i, 0]
             return state.result(action)
 
@@ -90,14 +100,12 @@ class CustomPlayer(DataPlayer):
             Returns the state resulting from taking the best action
             c value between 0 (max score) and 1 (prioritize exploration)
             """
+            # logging.debug("Getting the best child")
             df['score'] = (df['utility'].astype('float')/df['visit'].astype('float')) + df['visit'].apply(lambda x: c * math.sqrt(2 * math.log(i)/float(x)))
             df['score'] = df['score'].astype('float')
             # Get the index and action of the row with the maximum score for the present state
             maxscoreid = df.loc[df['board'] == str(state.board), 'score'].idxmax()
             next_action = df.iloc[maxscoreid]['action']
-            # Update the visit and round statistics
-            df.loc[maxscoreid, 'visit'] += 1
-            df.loc[maxscoreid, 'nround'] = i
 
             return next_action
 
@@ -105,66 +113,31 @@ class CustomPlayer(DataPlayer):
             """
             The simulation to run when visiting unexplored nodes. Defaults to uniform random moves
             """
-            if state.terminal_test():
-                delta = state.utility(self.player_id)
-                # Normalize to [-1, 1]
-                if abs(delta) == float('inf') and delta < 0:
-                    delta = -1
-                elif abs(delta) == float('inf') and delta > 0:
-                    delta = 1
-                return delta
+            while not state.terminal_test():
+                state = state.result(random.choice(state.actions()))
 
-            next_state = state.result(random.choice(state.actions()))
-            value = default_policy(next_state)
-            return value
+            delta = state.utility(self.player_id)
+            if abs(delta) == float('inf') and delta < 0:
+                delta = -1
+            elif abs(delta) == float('inf') and delta > 0:
+                delta = 1
+            # logging.info("%s: %s" % (str(self.player_id), delta))
+            return delta
+
 
         def backup_negamax(delta):
             """
-            The utility of an action is updated here
-            For negamax, ensure that the sign flipping sequence is correct (based on ply.count())
+            Propagates the terminal utility up the search tree
             """
-            # Update the scoresheet
-            # It appears that an alternating scoresheet is not necessary as the simulation
-            # only gets to cover moves by the custom player
-            # if len(tp) % 2 == 0:
-            #     # Ends with an odd index
-            #     tp.loc[tp.index % 2 == 0, 'utility'] = -delta
-            #     tp.loc[tp.index % 2 == 1, 'utility'] = delta
-            # else:
-            #     # Ends with an even index
-            #     tp.loc[tp.index % 2 == 0, 'utility'] = delta
-            #     tp.loc[tp.index % 2 == 1, 'utility'] = -delta
-            
-            # Update the serializable data frame
-            # df = df.set_index(['board', 'plycount', 'locs', 'action']).add(tp.set_index(['board', 'plycount', 'locs', 'action']), fill_value=0).reset_index()
-            df.loc[df['nround'] == i, 'utility'] += delta
+            # logging.debug("Propagating terminal value up the tree")
+            df.loc[(df['nround'] == i) & (df['plycount'] % 2 == plyturn), 'utility'] += delta
+            df.loc[(df['nround'] == i) & (df['plycount'] % 2 != plyturn), 'utility'] -= delta
             return
 
-        # In the absence of an opening book, pick a random opening move
-        # Need to do this to populate df with at least one row
-        if df is not None:
-            logging.info(str(df))
-        else:
-            logging.debug("Creating a new dataframe")
-            df = pd.DataFrame(columns=['board', 'plycount', 'locs', 'action', 'utility', 'visit', 'nround', 'score'])
-            action = random.choice(state.actions())
-            delta = default_policy(state.result(action))
-            df.loc[len(df)] = [str(state.board), state.ply_count, state.locs, action, delta, 1, i, delta]
-            df['score'] = df['score'].astype('float')
-            i += 1
+        next_state = tree_policy(state)
 
-        while time.time() - start_time < 0.7:
-        # while i < 5:
-            gc.collect()
-            next_state = tree_policy(state)
-
-            if not next_state.terminal_test():
-                delta = default_policy(next_state)
-                backup_negamax(delta)
-            else:
-                # No point looping further if terminal state is hit
-                # May explore the possibility of injecting some randomness here
-                break
-            i += 1
+        if not next_state.terminal_test():
+            delta = default_policy(next_state)
+            backup_negamax(delta)
 
         return best_child(state, 0), df
