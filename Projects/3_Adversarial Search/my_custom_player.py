@@ -1,12 +1,10 @@
-import gc
-# import logging
+import logging
 import math
-import pandas as pd
-# import pdb
+import pdb
 import random
-# import sys
 
 
+from collections import namedtuple
 from sample_players import DataPlayer
 
 
@@ -24,7 +22,7 @@ class CustomPlayer(DataPlayer):
       any pickleable object to the self.context attribute.
     **********************************************************************
     """
-    # logging.basicConfig(filename='matches.log',level=logging.DEBUG)
+    logging.basicConfig(filename='matches.log',level=logging.DEBUG)
 
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
@@ -47,23 +45,25 @@ class CustomPlayer(DataPlayer):
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
         i = 1
-        df = pd.DataFrame(columns=['board', 'plycount', 'locs', 'action', 'utility', 'visit', 'nround', 'score'])
+        statlist = []
         plyturn = state.ply_count % 2
         # Just to prevent a forfeit due to a no-action!
         self.queue.put(random.choice(state.actions()))
 
         while True:
-            next_action, df = self.uct_search(state, df, i, plyturn)
+            next_action, statlist = self.uct_search(state, i, plyturn, statlist)
             self.queue.put(next_action)
-            # logging.info("Play %s, Round %s\n" % (state.ply_count, i))
-            # logging.info("Selected action: %s\n" % next_action)
-            # logging.info(str(df))
-            # logging.info("\n-------------------------------------------------\n\n")
-            gc.collect()
+            logging.info("Play %s, Round %s\n" % (state.ply_count, i))
+            logging.info("Selected action: %s\n" % next_action)
+            logging.info(str(statlist))
+            logging.info("\n-------------------------------------------------\n\n")
+
             i += 1
 
 
-    def uct_search(self, state, df, i, plyturn):
+    def uct_search(self, state, i, plyturn, statlist):
+        Stat = namedtuple('Stat', 'board plycount locs action utility visit nround score')
+
         def tree_policy(state):
             """
             Determine the most urgent node to expand - balancing areas not explored and areas that look promising
@@ -72,28 +72,44 @@ class CustomPlayer(DataPlayer):
             if state.terminal_test():
                 return state
 
-            # Unexplored nodes get priority
-            untried = [a for a in state.actions() if a not in list(df.loc[df['board'] == str(state.board), 'action'])]
+            # All taken actions at this depth
+            tried = [s.action for s in statlist if s.board == state.board]
+            # See if there's any untried actions left
+            untried = [a for a in state.actions() if a not in tried]
+            topop = []
+            toappend = []
 
             if len(untried) > 0:
                 action = random.choice(untried)
                 return expand(state, action)
             else:
                 next_action = best_child(state, 1)
-                # Update the visit and round statistics
-                df.loc[(df['board'] == str(state.board)) & (df['action'] == next_action), 'visit'] += 1
-                # Mark the path taken for the current round of iteration
-                df.loc[(df['board'] == str(state.board)) & (df['action'] == next_action), 'nround'] = i
-                state = tree_policy(state.result(best_child(state, 1)))
+
+                for k, s in enumerate(statlist):
+                    if s.board == str(state.board) and s.action == next_action:
+                        visit1 = statlist[k].visit + 1
+                        news = statlist[k]._replace(visit=visit1)
+                        news = news._replace(nround=i)
+                        
+                        topop.append(k)
+                        toappend.append(news)
+
+                        break
+
+                update_scores(topop, toappend)
+                state = tree_policy(state.result(next_action))
+
                 return state
+
 
         def expand(state, action):
             """
             Returns a state resulting from taking an action from the list of untried nodes
             """
             # logging.debug("Expanding untried nodes")
-            df.loc[len(df)] = [str(state.board), state.ply_count, state.locs, action, 0, 1, i, 0]
+            statlist.append(Stat(str(state.board), state.ply_count, state.locs, action, 0, 1, i, 0))
             return state.result(action)
+
 
         def best_child(state, c):
             """
@@ -101,13 +117,21 @@ class CustomPlayer(DataPlayer):
             c value between 0 (max score) and 1 (prioritize exploration)
             """
             # logging.debug("Getting the best child")
-            df['score'] = (df['utility'].astype('float')/df['visit'].astype('float')) + df['visit'].apply(lambda x: c * math.sqrt(2 * math.log(i)/float(x)))
-            df['score'] = df['score'].astype('float')
-            # Get the index and action of the row with the maximum score for the present state
-            maxscoreid = df.loc[df['board'] == str(state.board), 'score'].idxmax()
-            next_action = df.iloc[maxscoreid]['action']
+            # All taken actions at this depth
+            tried = [s for s in statlist if s.board == str(state.board)]
+            # Init the score to the score of the first element
+            # TODO: Causing the agent to return only move index 0 at first move
+            maxscore = -2
+            maxaction = None
+            # Compute the score
+            for t in tried:
+                score = (t.utility/t.visit) + c * math.sqrt(2 * math.log(i)/t.visit)
+                if score > maxscore:
+                    maxscore = score
+                    maxaction = t.action
 
-            return next_action
+            return maxaction
+
 
         def default_policy(state):
             """
@@ -121,7 +145,7 @@ class CustomPlayer(DataPlayer):
                 delta = -1
             elif abs(delta) == float('inf') and delta > 0:
                 delta = 1
-            # logging.info("%s: %s" % (str(self.player_id), delta))
+            logging.info("%s: %s" % (str(self.player_id), delta))
             return delta
 
 
@@ -130,9 +154,37 @@ class CustomPlayer(DataPlayer):
             Propagates the terminal utility up the search tree
             """
             # logging.debug("Propagating terminal value up the tree")
-            df.loc[(df['nround'] == i) & (df['plycount'] % 2 == plyturn), 'utility'] += delta
-            df.loc[(df['nround'] == i) & (df['plycount'] % 2 != plyturn), 'utility'] -= delta
+            # TODO: Even with _replace, the namedtuple needs to be dropped and re-added
+            # or statlist will not get updated!
+            topop = []
+            toappend = []
+            for k, s in enumerate(statlist):
+                if s.nround == i:
+                    if s.plycount % 2 == plyturn:
+                        utility1 = s.utility + delta
+                        news = statlist[k]._replace(utility=utility1)
+                    elif s.plycount % 2 != plyturn:
+                        utility1 = s.utility - delta
+                        news = statlist[k]._replace(utility=utility1)
+
+                    topop.append(k)
+                    toappend.append(news)
+
+            update_scores(topop, toappend)
+
             return
+
+
+        def update_scores(topop, toappend):
+            # Remove outdated tuples
+            for p in topop:
+                statlist.pop(p)
+            # Add the updated ones
+            for a in toappend:
+                statlist.append(a)
+
+            return
+
 
         next_state = tree_policy(state)
 
@@ -140,4 +192,4 @@ class CustomPlayer(DataPlayer):
             delta = default_policy(next_state)
             backup_negamax(delta)
 
-        return best_child(state, 0), df
+        return best_child(state, 0), statlist
