@@ -1,7 +1,9 @@
 # import logging
+import datetime
 import math
-import pdb
+# import pdb
 import random
+import time
 
 from copy import deepcopy
 from collections import namedtuple
@@ -26,10 +28,10 @@ class CustomPlayer(DataPlayer):
     i = 1
     plyturn = None
     statlist = []
-    modifier = 1
-    # opslist = []
+    modifier = -1
+
     Stat = namedtuple('Stat', 'board plycount locs action utility visit nround')
-    # logging.basicConfig(filename='matches.log',level=logging.DEBUG)
+    #logging.basicConfig(filename='matches.log',level=#logging.NOTSET)
 
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
@@ -53,51 +55,53 @@ class CustomPlayer(DataPlayer):
         #          (the timer is automatically managed for you)
         self.plyturn = state.ply_count % 2
         if self.plyturn == 1:
-            self.modifier = -1
+            self.modifier = 1
         # Just to prevent a forfeit due to a no-action!
         self.queue.put(random.choice(state.actions()))
-        # logging.info("\n-------------------------------------------------\n\n")
-        # logging.info("Play %s\n" % (state.ply_count))
+        #logging.info("\n-------------------------------------------------\n\n")
+        #logging.info("Play %s\n" % (state.ply_count))
+        # pdb.set_trace()
+        while (self.queue._TimedQueue__stop_time -10) > time.perf_counter():
+            #logging.info("\n-------------------------------------------------\n\n")
+            #logging.info("Play %s\n" % (state.ply_count))
 
-        while True:
-            # logging.info("\n-------------------------------------------------\n\n")
-            # logging.info("Play %s\n" % (state.ply_count))
             next_action = self.uct_search(state)
             self.queue.put(next_action)
-            # logging.info(str(self.opslist))
-            # logging.info("Round %s\n" % (self.i))
-            # logging.info("Selected action: %s\n" % next_action)
-            # logging.info(str(self.statlist))
-            # logging.info("\n-------------------------------------------------\n\n")
+            #logging.info("Round %s\n" % (self.i))
+            #logging.info("Selected action: %s\n" % next_action)
+            #logging.info(str(self.statlist))
+            #logging.info("\n-------------------------------------------------\n\n")
             self.i += 1
 
-        # logging.info("Selected action: %s\n" % next_action)
-        # logging.info("Rounds Simulated %s\n" % (self.i))
-        # logging.info(str(self.statlist))
-        # logging.info("\n-------------------------------------------------\n\n")
+        #logging.info("Selected action: %s\n" % next_action)
+        #logging.info("Rounds Simulated %s\n" % (self.i))
+        #logging.info(str(self.statlist))
+        #logging.info("\n-------------------------------------------------\n\n")
 
 
     def uct_search(self, state):
-        next_state = self.tree_policy_nonrecurse(state)
+        #logging.debug("UCT Begin:%s" % str(state))
+        next_state = self.tree_policy(state)
 
         if not next_state.terminal_test():
             delta = self.default_policy(next_state)
             self.backup_negamax(delta)
 
+        #logging.debug("UCT End:%s" % str(state))
         return self.best_child(state, 0)
 
 
-    def tree_policy_nonrecurse(self, state):
+    def tree_policy(self, state):
         statecopy = deepcopy(state) # State 0
 
         while not statecopy.terminal_test():
-            # logging.debug("Start: %s" % str(statecopy))
+            #logging.debug("Start: %s" % str(statecopy))
             # All taken actions at this depth
             tried = [s.action for s in self.statlist if s.board == str(statecopy.board)]
-            # logging.debug("Tried: %s" % str(tried))
+            #logging.debug("Tried: %s" % str(tried))
             # See if there's any untried actions left
             untried = [a for a in statecopy.actions() if a not in tried]
-            # logging.debug("Available actions %s\n Untried %s" % (str(statecopy.actions()), str(untried)))
+            #logging.debug("Available actions %s\n Untried %s" % (str(statecopy.actions()), str(untried)))
 
             topop = []
             toappend = []
@@ -120,10 +124,10 @@ class CustomPlayer(DataPlayer):
                         break
 
                 self.update_scores(topop, toappend)
-                # logging.debug(str(self.statlist))
+                #logging.debug(str(self.statlist))
                 statecopy = statecopy.result(next_action)
 
-            # logging.debug("\nEnd: %s" % str(statecopy))
+            #logging.debug("\nEnd: %s" % str(statecopy))
         return statecopy
 
 
@@ -142,14 +146,14 @@ class CustomPlayer(DataPlayer):
         """
         # All taken actions at this depth
         tried = [s for s in self.statlist if s.board == str(state.board)]
-        # logging.debug("Tried: %s" % str(tried))
+        #logging.debug("Tried: %s" % str(tried))
 
-        maxscore = -2
+        maxscore = -999
         maxaction = []
         # Compute the score
         for t in tried:
             score = (t.utility/t.visit) + c * math.sqrt(2 * math.log(self.i)/t.visit)
-            # logging.debug("Action %s Score %s" % (t.action, str(score)))
+            #logging.debug("Action %s Score %s" % (t.action, str(score)))
             if score > maxscore:
                 maxscore = score
                 del maxaction[:]
@@ -172,7 +176,7 @@ class CustomPlayer(DataPlayer):
             delta = -1
         elif abs(delta) == float('inf') and delta > 0:
             delta = 1
-        # logging.debug("%s: %s" % (str(self.player_id), delta))
+        #logging.debug("%s: %s" % (str(self.player_id), delta))
         return delta
 
 
