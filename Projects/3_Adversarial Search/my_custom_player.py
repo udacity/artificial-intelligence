@@ -61,7 +61,7 @@ class CustomPlayer(DataPlayer):
         #logging.info("\n-------------------------------------------------\n\n")
         #logging.info("Play %s\n" % (state.ply_count))
         # pdb.set_trace()
-        while (self.queue._TimedQueue__stop_time -10) > time.perf_counter():
+        while (self.queue._TimedQueue__stop_time - 0.04) > time.perf_counter():
             #logging.info("\n-------------------------------------------------\n\n")
             #logging.info("Play %s\n" % (state.ply_count))
 
