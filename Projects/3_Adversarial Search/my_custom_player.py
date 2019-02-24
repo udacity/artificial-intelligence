@@ -28,9 +28,9 @@ class CustomPlayer(DataPlayer):
     i = 1
     plyturn = None
     statlist = []
-    modifier = -1
+    modifier = 1
 
-    Stat = namedtuple('Stat', 'board plycount locs action utility visit nround')
+    Stat = namedtuple('Stat', 'state action utility visit nround')
     #logging.basicConfig(filename='matches.log',level=#logging.NOTSET)
 
     def get_action(self, state):
@@ -54,8 +54,8 @@ class CustomPlayer(DataPlayer):
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
         self.plyturn = state.ply_count % 2
-        if self.plyturn == 1:
-            self.modifier = 1
+        # if self.plyturn == 1:
+        #     self.modifier = 1
         # Just to prevent a forfeit due to a no-action!
         self.queue.put(random.choice(state.actions()))
         #logging.info("\n-------------------------------------------------\n\n")
@@ -97,7 +97,7 @@ class CustomPlayer(DataPlayer):
         while not statecopy.terminal_test():
             #logging.debug("Start: %s" % str(statecopy))
             # All taken actions at this depth
-            tried = [s.action for s in self.statlist if s.board == str(statecopy.board)]
+            tried = [s.action for s in self.statlist if s.state == statecopy]
             #logging.debug("Tried: %s" % str(tried))
             # See if there's any untried actions left
             untried = [a for a in statecopy.actions() if a not in tried]
@@ -114,7 +114,7 @@ class CustomPlayer(DataPlayer):
                 next_action = self.best_child(statecopy, 1)
 
                 for k, s in enumerate(self.statlist):
-                    if s.board == str(statecopy.board) and s.action == next_action:
+                    if s.state == statecopy and s.action == next_action:
                         visit1 = self.statlist[k].visit + 1
                         news = self.statlist[k]._replace(visit=visit1)
                         news = news._replace(nround=self.i)
@@ -135,7 +135,7 @@ class CustomPlayer(DataPlayer):
         """
         Returns a state resulting from taking an action from the list of untried nodes
         """
-        self.statlist.append(self.Stat(str(state.board), state.ply_count, state.locs, action, 0, 1, self.i))
+        self.statlist.append(self.Stat(state, action, 0, 1, self.i))
         return state.result(action)
 
 
@@ -145,7 +145,7 @@ class CustomPlayer(DataPlayer):
         c value between 0 (max score) and 1 (prioritize exploration)
         """
         # All taken actions at this depth
-        tried = [s for s in self.statlist if s.board == str(state.board)]
+        tried = [s for s in self.statlist if s.state == state]
         #logging.debug("Tried: %s" % str(tried))
 
         maxscore = -999
@@ -188,10 +188,10 @@ class CustomPlayer(DataPlayer):
         toappend = []
         for k, s in enumerate(self.statlist):
             if s.nround == self.i:
-                if s.plycount % 2 == self.plyturn:
+                if s.state.ply_count % 2 == self.plyturn:
                     utility1 = s.utility + delta * self.modifier
                     news = self.statlist[k]._replace(utility=utility1)
-                elif s.plycount % 2 != self.plyturn:
+                elif s.state.ply_count % 2 != self.plyturn:
                     utility1 = s.utility - delta * self.modifier
                     news = self.statlist[k]._replace(utility=utility1)
 
