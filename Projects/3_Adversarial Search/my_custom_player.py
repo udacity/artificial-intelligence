@@ -1,6 +1,7 @@
 import math
 import random
 import time
+import logging
 
 from copy import deepcopy
 from collections import namedtuple
@@ -36,6 +37,7 @@ class CustomPlayer(DataPlayer):
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
+        logging.info("Move %s" % state.ply_count)
         self.queue.put(random.choice(state.actions()))
         i = 1
         statlist = []
@@ -111,6 +113,10 @@ class CustomPlayer(DataPlayer):
                     maxaction.append(t.action)
                 elif score == maxscore:
                     maxaction.append(t.action)
+
+            if len(maxaction) < 1:
+                logging.error("IndexError: maxaction is empty!")
+
             return random.choice(maxaction)
 
 
