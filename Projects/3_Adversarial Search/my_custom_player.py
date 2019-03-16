@@ -6,10 +6,10 @@ import logging
 from copy import deepcopy
 from collections import namedtuple
 
-from sample_players import DataPlayer
+from sample_players import BasePlayer
 
 
-class CustomPlayer(DataPlayer):
+class CustomPlayer(BasePlayer):
     """ Implement your own agent to play knight's Isolation
     The get_action() method is the only required method for this project.
     You can modify the interface for get_action by adding named parameters
@@ -127,12 +127,7 @@ class CustomPlayer(DataPlayer):
             while not state.terminal_test():
                 state = state.result(random.choice(state.actions()))
 
-            delta = state.utility(self.player_id)
-            if abs(delta) == float('inf') and delta < 0:
-                delta = -1
-            elif abs(delta) == float('inf') and delta > 0:
-                delta = 1
-            return delta
+            return normalize_delta(state.utility(self.player_id))
 
 
         def backup_negamax(delta):
@@ -158,6 +153,9 @@ class CustomPlayer(DataPlayer):
 
 
         def update_scores(topop, toappend):
+            """
+            Update the scoresheet
+            """
             # Remove outdated tuples. Order needs to be in reverse or pop will fail!
             for p in sorted(topop, reverse=True):
                 statlist.pop(p)
@@ -165,6 +163,17 @@ class CustomPlayer(DataPlayer):
             for a in toappend:
                 statlist.append(a)
             return
+
+
+        def normalize_delta(delta):
+            """
+            Fits the utility of game states into the range between -1 and 1
+            """
+            if delta < 0:
+                delta = -1
+            elif delta > 0:
+                delta = 1
+            return delta
 
 
         next_state = tree_policy(state)
