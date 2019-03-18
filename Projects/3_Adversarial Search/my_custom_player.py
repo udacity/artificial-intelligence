@@ -1,7 +1,7 @@
 import math
 import random
 import time
-import logging
+# import logging
 
 from copy import deepcopy
 from collections import namedtuple
@@ -37,7 +37,7 @@ class CustomPlayer(BasePlayer):
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
-        logging.info("Move %s" % state.ply_count)
+        # logging.info("Move %s" % state.ply_count)
         self.queue.put(random.choice(state.actions()))
         i = 1
         statlist = []
@@ -114,8 +114,8 @@ class CustomPlayer(BasePlayer):
                 elif score == maxscore:
                     maxaction.append(t.action)
 
-            if len(maxaction) < 1:
-                logging.error("IndexError: maxaction is empty!")
+            # if len(maxaction) < 1:
+            #     logging.error("IndexError: maxaction is empty!")
 
             return random.choice(maxaction)
 
