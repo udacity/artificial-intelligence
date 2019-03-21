@@ -1,15 +1,14 @@
 import math
 import random
-import time
-# import logging
+# import time
 
 from copy import deepcopy
 from collections import namedtuple
 
-from sample_players import BasePlayer
+from sample_players import DataPlayer
 
 
-class CustomPlayer(BasePlayer):
+class CustomPlayer(DataPlayer):
     """ Implement your own agent to play knight's Isolation
     The get_action() method is the only required method for this project.
     You can modify the interface for get_action by adding named parameters
@@ -37,15 +36,18 @@ class CustomPlayer(BasePlayer):
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
-        # logging.info("Move %s" % state.ply_count)
-        self.queue.put(random.choice(state.actions()))
-        i = 1
-        statlist = []
+        if not state.terminal_test():
+            # self.queue.put(random.choice(state.actions()))
+            i = 1
+            statlist = []
 
-        while (self.queue._TimedQueue__stop_time - 0.05) > time.perf_counter():
-            next_action = self.uct_search(state, statlist, i)
-            self.queue.put(next_action)
-            i += 1
+            # while (self.queue._TimedQueue__stop_time - 0.05) > time.perf_counter():
+            while True:
+                next_action = self.uct_search(state, statlist, i)
+                self.queue.put(next_action)
+                i += 1
+        else:
+            return None
 
 
     def uct_search(self, state, statlist, i):
@@ -113,9 +115,6 @@ class CustomPlayer(BasePlayer):
                     maxaction.append(t.action)
                 elif score == maxscore:
                     maxaction.append(t.action)
-
-            # if len(maxaction) < 1:
-            #     logging.error("IndexError: maxaction is empty!")
 
             return random.choice(maxaction)
 
