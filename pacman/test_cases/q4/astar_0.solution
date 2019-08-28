@@ -1,0 +1,7 @@
+# This is the solution file for test_cases/q4/astar_0.test.
+# This solution is designed to support both right-to-left
+# and left-to-right implementations.
+solution: "Right Down Down"
+expanded_states: "A B D C G"
+rev_solution: "Right Down Down"
+rev_expanded_states: "A B D C G"

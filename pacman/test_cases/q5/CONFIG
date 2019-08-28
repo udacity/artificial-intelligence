@@ -1,0 +1,3 @@
+class: "PassAllTestsQuestion"
+max_points: "3"
+depends: "q2"
