@@ -110,8 +110,7 @@ def depthFirstSearch(problem):
 
         for successor in problem.getSuccessors(current_node):
             if not (successor[0] in explored):
-                next_path = list(current_path)
-                next_path.append(successor)
+                next_path = list(current_path) + [successor]
                 paths.append(next_path)
                 frontier.push(successor)
 
@@ -138,8 +137,7 @@ def breadthFirstSearch(problem):
 
             for successor in problem.getSuccessors(current_node):
                 if not (successor[0] in explored):
-                    next_path = list(current_path)
-                    next_path.append(successor)
+                    next_path = list(current_path) + [successor]
                     paths.append(next_path)
                     frontier.push(successor)
 
@@ -168,6 +166,3 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
-
-def makePath(successor):
-  return (successor[0], [ successor[1] ], successor[2])
