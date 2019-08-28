@@ -1,0 +1,30 @@
+# Graph where BFS finds the optimal solution but DFS does not
+class: "GraphSearchTest"
+algorithm: "breadthFirstSearch"
+
+diagram: """
+/-- B
+|   ^
+|   |
+|  *A -->[G]
+|   |     ^
+|   V     |
+\-->D ----/
+
+A is the start state, G is the goal.  Arrows
+mark possible transitions
+"""
+# The following section specifies the search problem and the solution.
+# The graph is specified by first the set of start states, followed by
+# the set of goal states, and lastly by the state transitions which are
+# of the form: 
+#      <start state> <actions> <end state> <cost>
+graph: """
+start_state: A
+goal_states: G
+A 0:A->B B 1.0
+A 1:A->G G 2.0
+A 2:A->D D 4.0
+B 0:B->D D 8.0
+D 0:D->G G 16.0
+"""

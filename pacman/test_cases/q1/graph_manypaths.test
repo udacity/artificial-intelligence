@@ -1,0 +1,39 @@
+class: "GraphSearchTest"
+algorithm: "depthFirstSearch"
+
+diagram: """
+    B1          E1
+   ^  \        ^  \
+  /    V      /    V
+*A --> C --> D --> F --> [G]
+  \    ^      \    ^
+   V  /        V  /
+    B2          E2
+
+A is the start state, G is the goal.  Arrows mark 
+possible state transitions.  This graph has multiple
+paths to the goal, where nodes with the same state 
+are added to the fringe multiple times before they
+are expanded.
+"""
+# The following section specifies the search problem and the solution.
+# The graph is specified by first the set of start states, followed by
+# the set of goal states, and lastly by the state transitions which are
+# of the form: 
+#      <start state> <actions> <end state> <cost>
+graph: """
+start_state: A
+goal_states: G
+A 0:A->B1 B1 1.0
+A 1:A->C C 2.0
+A 2:A->B2 B2 4.0
+B1 0:B1->C C 8.0
+B2 0:B2->C C 16.0
+C 0:C->D D 32.0
+D 0:D->E1 E1 64.0
+D 1:D->F F 128.0
+D 2:D->E2 E2 256.0
+E1 0:E1->F F 512.0
+E2 0:E2->F F 1024.0
+F 0:F->G G 2048.0
+"""

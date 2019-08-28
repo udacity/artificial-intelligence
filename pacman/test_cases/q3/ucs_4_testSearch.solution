@@ -1,0 +1,12 @@
+# This is the solution file for test_cases/q3/ucs_4_testSearch.test.
+# This solution is designed to support both right-to-left
+# and left-to-right implementations.
+# Number of nodes expanded must be with a factor of 2.0 of the numbers below.
+solution: """
+West East East South South West West
+"""
+expanded_nodes: "14"
+rev_solution: """
+West East East South South West West
+"""
+rev_expanded_nodes: "13"
