@@ -384,7 +384,7 @@ def cornersHeuristic(state, problem):
 
     current_position = state[0]
     already_visited = state[1]
-    
+
 
     closest_corner_distance = float('inf')
 
@@ -505,9 +505,19 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    position, food_grid = state
+
+    if problem != () and problem.isGoalState(state):
+        return 0
+
+    distances = []
+
+    food_list = food_grid.asList()
+    pos = position
+
+    distances = list(map(lambda food: mazeDistance(position, food, problem.startingGameState), food_list))
+
+    return max(distances)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
