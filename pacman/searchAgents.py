@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+from itertools import combinations
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -297,7 +298,7 @@ class CornersProblem(search.SearchProblem):
         x,y = self.startingPosition
 
         visited_corners = tuple(((x,y) == corner for corner in self.corners))
-        
+
         return ((x,y), visited_corners)
 
     def isGoalState(self, state):
@@ -375,10 +376,43 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    corners = problem.corners # These are the corner coordinates
+    corners = list(problem.corners) # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
+    if problem.isGoalState(state):
+        return 0
+
+    current_position = state[0]
+    already_visited = state[1]
+
+
+    closest_corner_distance = float('inf')
+
+    for i, corner in enumerate(corners):
+        if not already_visited[i]:
+            distance_to_corner = util.manhattanDistance(current_position, corner)
+            if distance_to_corner < closest_corner_distance:
+                which_closest = i
+                closest_corner_distance = distance_to_corner
+
+    not_visited_corners = tuple((corner for (corner, visited) in zip(corners, already_visited) if not visited))
+
+    remainingCornerToCornerDistance = 0
+
+    # if len(not_visited_corners) > 1:
+    #     remainingCornerToCornerDistance = util.manhattanDistance(not_visited_corners[0], not_visited_corners[1])
+
+    if len(not_visited_corners) == 2:
+        remainingCornerToCornerDistance = util.manhattanDistance(not_visited_corners[0], not_visited_corners[1])
+    elif len(not_visited_corners) == 3:
+        remainingCornerToCornerDistance = min(util.manhattanDistance(not_visited_corners[0], not_visited_corners[1]), util.manhattanDistance(not_visited_corners[1], not_visited_corners[2]), util.manhattanDistance(not_visited_corners[0], not_visited_corners[2]))
+    elif len(not_visited_corners) == 4:
+        remainingCornerToCornerDistance = max(min(util.manhattanDistance(not_visited_corners[0], not_visited_corners[1]), util.manhattanDistance(not_visited_corners[1], not_visited_corners[2])), util.manhattanDistance(not_visited_corners[2], not_visited_corners[3]))
+
+    estimatedCost = closest_corner_distance + remainingCornerToCornerDistance
+    return estimatedCost
+
+
     return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
@@ -471,9 +505,19 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    position, food_grid = state
+
+    if problem != () and problem.isGoalState(state):
+        return 0
+
+    distances = []
+
+    food_list = food_grid.asList()
+    pos = position
+
+    distances = list(map(lambda food: mazeDistance(position, food, problem.startingGameState), food_list))
+
+    return max(distances)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -559,3 +603,13 @@ def mazeDistance(point1, point2, gameState):
     assert not walls[x2][y2], 'point2 is a wall: ' + str(point2)
     prob = PositionSearchProblem(gameState, start=point1, goal=point2, warn=False, visualize=False)
     return len(search.bfs(prob))
+
+def closestCornet(position, corners):
+
+    closest_distance = float('inf')
+    for corner in corners:
+        corner_distance = util.manhattanDistance(position, corner)
+        if corner_distance < closest_distance:
+            closest_corner = corner
+            closest_distance = corner_distance
+    return closest_corner
