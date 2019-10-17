@@ -1,5 +1,5 @@
 
-from itertools import chain, combinations
+from itertools import chain, combinations, product
 from aimacode.planning import Action
 from aimacode.utils import expr
 
@@ -20,22 +20,23 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
-        raise NotImplementedError
-
+        # raise NotImplementedError
+        return any([~effect in actionA.effects for effect in actionB.effects] + [~effect in actionB.effects for effect in actionA.effects])
 
     def _interference(self, actionA, actionB):
-        """ Return True if the effects of either action negate the preconditions of the other 
+        """ Return True if the effects of either action negate the preconditions of the other
 
         Hints:
             (1) `~Literal` can be used to logically negate a literal
             (2) `self.parents` contains a map from actions to preconditions
-        
+
         See Also
         --------
         layers.ActionNode
         """
         # TODO: implement this function
-        raise NotImplementedError
+        # raise NotImplementedError
+        return any([~effect in actionA.preconditions for effect in actionB.effects] + [~effect in actionB.preconditions for effect in actionA.effects])
 
     def _competing_needs(self, actionA, actionB):
         """ Return True if any preconditions of the two actions are pairwise mutex in the parent layer
@@ -43,14 +44,15 @@ class ActionLayer(BaseActionLayer):
         Hints:
             (1) `self.parent_layer` contains a reference to the previous literal layer
             (2) `self.parents` contains a map from actions to preconditions
-        
+
         See Also
         --------
         layers.ActionNode
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        raise NotImplementedError
+        # raise NotImplementedError
+        return any(self.parent_layer.is_mutex(preconditionA, preconditionB) for preconditionA, preconditionB in product(actionA.preconditions, actionB.preconditions))
 
 
 class LiteralLayer(BaseLiteralLayer):
@@ -67,12 +69,14 @@ class LiteralLayer(BaseLiteralLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        raise NotImplementedError
+        # raise NotImplementedError
+        return all(self.parent_layer.is_mutex(actionA,actionB) for actionA, actionB in product(self.parents[literalA], self.parents[literalB]))
 
     def _negation(self, literalA, literalB):
         """ Return True if two literals are negations of each other """
         # TODO: implement this function
-        raise NotImplementedError
+        # raise NotImplementedError
+        return literalA == ~literalB
 
 
 class PlanningGraph:
@@ -101,7 +105,7 @@ class PlanningGraph:
         # make no-op actions that persist every literal to the next layer
         no_ops = [make_node(n, no_op=True) for n in chain(*(makeNoOp(s) for s in problem.state_map))]
         self._actionNodes = no_ops + [make_node(a) for a in problem.actions_list]
-        
+
         # initialize the planning graph by finding the literals that are in the
         # first layer and finding the actions they they should be connected to
         literals = [s if f else ~s for f, s in zip(state, problem.state_map)]
@@ -118,7 +122,7 @@ class PlanningGraph:
         level at which the literal first appears in the planning graph. Note
         that the level cost is **NOT** the minimum number of actions to
         achieve a single goal literal.
-        
+
         For example, if Goal_1 first appears in level 0 of the graph (i.e.,
         it is satisfied at the root of the planning graph) and Goal_2 first
         appears in level 3, then the levelsum is 0 + 3 = 3.
@@ -136,7 +140,42 @@ class PlanningGraph:
         Russell-Norvig 10.3.1 (3rd Edition)
         """
         # TODO: implement this function
-        raise NotImplementedError
+        # raise NotImplementedError
+
+        # self.fill() # fill the planning graph until it levels off
+        #
+        # costs = 0
+        # for goal in self.goal:
+        #     for level, layer in enumerate(self.literal_layers):
+        #         if goal in layer:
+        #             costs += level
+        #             break
+        # return costs
+
+        goals = self.goal
+        # print("The goals are ", goals)
+        goals_reached = set()
+        cost = 0
+        level = 0
+        while not self._is_leveled:
+            layer = self.literal_layers[-1]
+
+            # print("*************************************")
+            # print("In current level = ".format(level))
+
+            for goal in goals.difference(goals_reached):
+                if goal in layer:
+                    # print("Goal {} is level {}".format(goal, level))
+                    cost += level
+                    goals_reached.add(goal)
+
+            # print("After level {}, goals seen are {}".format(level, goals_reached))
+
+            self._extend()
+            level += 1
+        return cost
+
+
 
     def h_maxlevel(self):
         """ Calculate the max level heuristic for the planning graph
@@ -166,7 +205,39 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic with A*
         """
         # TODO: implement maxlevel heuristic
-        raise NotImplementedError
+        # raise NotImplementedError
+
+        # self.fill() # fill the planning graph until it levels off
+        #
+        # costs = list()
+        # for goal in self.goal:
+        #     for level, layer in enumerate(self.literal_layers):
+        #         if goal in layer:
+        #             costs.append(level-1)
+        # return max(costs)
+
+        goals = self.goal
+        # print("The goals are ", goals)
+        goals_reached = set()
+        cost = list()
+        level = 0
+        while not self._is_leveled:
+            layer = self.literal_layers[-1]
+
+            # print("*************************************")
+            # print("In current level = ".format(level))
+
+            for goal in goals.difference(goals_reached):
+                if goal in layer:
+                    # print("Goal {} is level {}".format(goal, level))
+                    cost.append(level)
+                    goals_reached.add(goal)
+
+            # print("After level {}, goals seen are {}".format(level, goals_reached))
+
+            self._extend()
+            level += 1
+        return max(cost)
 
     def h_setlevel(self):
         """ Calculate the set level heuristic for the planning graph
@@ -191,7 +262,32 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
-        raise NotImplementedError
+        # raise NotImplementedError
+
+        def NoMutex(layer):
+            # if not AllGoalSeen(layer):
+            #     return False
+            for g1,g2 in combinations(self.goal,2):
+                if layer.is_mutex(g1,g2):
+                    return False
+            return True
+
+        goals = self.goal
+
+        # print("The goals are ", goals)
+        level = 0
+        while not self._is_leveled:
+            layer = self.literal_layers[-1]
+
+            all_goal_seen = all([goal in layer for goal in goals])
+            any_mutex = any([layer.is_mutex(goalA, goalB) for goalA, goalB in combinations(self.goal, 2)])
+
+            if all_goal_seen and not any_mutex:
+                break
+
+            self._extend()
+            level += 1
+        return level
 
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
@@ -224,7 +320,7 @@ class PlanningGraph:
         negative literals in the leaf nodes of the parent literal level.
 
         The new literal layer contains all literals that could result from taking each possible
-        action in the NEW action layer. 
+        action in the NEW action layer.
         """
         if self._is_leveled: return
 
