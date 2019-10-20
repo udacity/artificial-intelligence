@@ -76,7 +76,7 @@ Select at least one of the following to implement and evaluate in your report. (
 
 ### Option 1: Develop a custom heuristic (must not be one of the heuristics from lectures, and cannot only be a combination of the number of liberties available to each agent)
 
-- Create a performance baseline using `run_search.py` (with the `fair_matches` flag enabled) to evaluate the effectiveness of your agent using the #my_moves - #opponent_moves heuristic from lecture
+- Create a performance baseline using `run_match.py` (with the `fair_matches` flag enabled) to evaluate the effectiveness of your agent using the #my_moves - #opponent_moves heuristic from lecture
 - Use the same process to evaluate the effectiveness of your agent using your own custom heuristic
     
 **Hints:**
@@ -89,7 +89,7 @@ Select at least one of the following to implement and evaluate in your report. (
 ### Option 2: Develop an opening book (must span at least depth 4 of the search tree)
 
 - Write your own code to develop an opening book of the best moves for every possible game state from an empty board to at least a depth of 4 plies
-- Create a performance baseline using `run_search.py` (with the `fair_matches` flag _disabled_) to evaluate the effectiveness of your agent using randomly chosen opening moves.  (You can use any heuristic function, but you should use the same heuristic on your agent for all experiments.)
+- Create a performance baseline using `run_match.py` (with the `fair_matches` flag _disabled_) to evaluate the effectiveness of your agent using randomly chosen opening moves.  (You can use any heuristic function, but you should use the same heuristic on your agent for all experiments.)
 - Use the same procedure to evaluate the effectiveness of your agent when early moves are selected from your opening book
 
 **Hints:**
@@ -112,8 +112,8 @@ with open("data.pickle", 'wb') as f:
 
 ### Option 3: Build an agent using advanced search techniques (for example: killer heuristic, principle variation search (not in lecture), or monte carlo tree search (not in lecture))
 
-- Create a performance baseline using `run_search.py` to evaluate the effectiveness of a baseline agent (e.g., an agent using your minimax or alpha-beta search code from the classroom)
-- Use `run_search.py` to evaluate the effectiveness of your agent using your own custom search techniques
+- Create a performance baseline using `run_match.py` to evaluate the effectiveness of a baseline agent (e.g., an agent using your minimax or alpha-beta search code from the classroom)
+- Use `run_match.py` to evaluate the effectiveness of your agent using your own custom search techniques
 - You must decide whether to test with or without "fair" matches enabled--justify your choice in your report
     
 **Hints:**
