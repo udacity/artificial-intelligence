@@ -5,7 +5,7 @@ from collections import deque
 from random import choice
 from textwrap import dedent
 
-from isolation import Isolation, Agent, fork_get_action, play
+from isolation import Isolation, Agent, fork_get_action, play, DebugState
 from sample_players import RandomPlayer
 from my_custom_player import CustomPlayer
 
@@ -60,5 +60,10 @@ class CustomPlayerPlayTest(BaseCustomPlayerTest):
         moves = deque(game_history)
         while moves: state = state.result(moves.popleft())
 
-        self.assertTrue(state.terminal_test(), "Your agent did not play until a terminal state.")
+        if not state.terminal_test():
+            print(f"Your agent with id:{state.player()} was not able to make a move in state:")
+            debug_state = DebugState.from_state(state)
+            print(debug_state)
+                       
+            raise Exception("Your agent did not play until a terminal state.")
 
