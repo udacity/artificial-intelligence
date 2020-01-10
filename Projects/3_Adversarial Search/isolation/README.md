@@ -49,7 +49,7 @@ Index:     1 1   1 0    9     8     7     6     5     4     3     2     1     0
 
 ```
 #### Important Note:
-- **The actual implementation differs in one significant way from the description above.** The board can be further simplified by eliminating the left-most and right-most zeros (at indices 0 and 11 in the example above). Leading zeros are implicitly non-functional, and the single trailing zero is just a constant offset on the other indices.  As a result, C2 is at index 0, B2 is at index 4, and indices 10 & 11 do not exist.  The final bit string has a length of (WIDTH + 2) * HEIGHT - 2, (the width of each row, times the height of the board, subtracting one leading & one trailing zero bit).
+- **The actual implementation differs in one significant way from the description above.** The board can be further simplified by eliminating the left-most and right-most zeros (at indices 0 and 11 in the example above). Leading zeros are implicitly non-functional, and the single trailing zero is just a constant offset on the other indices.  As a result, C2 is at index 0, B2 is at index 4, and indices 10 & 11 do not exist.  Additionally, it is common to add separating bits to the bitboard to simplify the handling of boundary conditions. In this case, one bit each is added to the head and tail of every row, giving the final bit string a length of (WIDTH + 2) * HEIGHT - 2, (the width of each row, times the height of the board, subtracting one leading & one trailing zero bit).
 
 
 ### Movement
