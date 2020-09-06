@@ -35,18 +35,18 @@ $ source activate aind
 - Download a copy of the project files from GitHub and navigate to the project folder. (Note: if you've previously downloaded the repository for another project then you can skip the clone command. However, you should run `git pull` to receive any project updates since you cloned the repository.)
 ```
 (aind) $ git clone https://github.com/udacity/artificial-intelligence
-(aind) $ cd "artificial-intelligence/Projects/3_Game Playing"
+(aind) $ cd "artificial-intelligence/Projects/3_Adversarial Search"
 ```
 
 
 ## Instructions
 
-You must implement an agent in the `CustomPlayer` class defined in the `game_agent.py` file. The interface definition for game agents only requires you to implement the `.get_action()` method, but you can add any other methods to the class that you deem necessary.  You can build a basic agent by combining minimax search with alpha-beta pruning and iterative deepening from lecture.
+You must implement an agent in the `CustomPlayer` class defined in the `my_custom_player.py` file. The interface definition for game agents only requires you to implement the `.get_action()` method, but you can add any other methods to the class that you deem necessary.  You can build a basic agent by combining minimax search with alpha-beta pruning and iterative deepening from lecture.
 
 **NOTE:** Your agent will **not** be evaluated in an environment suitable for running machine learning or deep learning agents (like AlphaGo); visit an office hours sessions **after** completing the project if you would like guidance on incorporating machine learning in your agent.
 
 #### The get_action() Method
-This function is called once per turn for each player. The calling function handles the time limit and 
+This function is called once per turn for each player. The calling function handles the time limit and
 ```
 def get_action(self, state):
     import random
@@ -78,7 +78,7 @@ Select at least one of the following to implement and evaluate in your report. (
 
 - Create a performance baseline using `run_search.py` (with the `fair_matches` flag enabled) to evaluate the effectiveness of your agent using the #my_moves - #opponent_moves heuristic from lecture
 - Use the same process to evaluate the effectiveness of your agent using your own custom heuristic
-    
+
 **Hints:**
 - Research other games (chess, go, connect4, etc.) to get ideas for developing good heuristics
 - If the results of your tests are very close, try increasing the number of matches (e.g., >100) to increase your confidence in the results
@@ -97,7 +97,7 @@ Select at least one of the following to implement and evaluate in your report. (
 - If the results are very close, try increasing the number of matches (e.g., >100) to increase your confidence in the results
 
 **Adding a basic opening book**
-- You will need to write your own code to develop a good opening book, but you can pass data into your agent by saving the file as "data.pickle" in the same folder as `game_agent.py`. Use the [pickle](https://docs.python.org/3/library/pickle.html) module to serialize the object you want to save. The pickled object will be accessible to your agent through the `self.data` attribute.
+- You will need to write your own code to develop a good opening book, but you can pass data into your agent by saving the file as "data.pickle" in the same folder as `my_custom_player.py`. Use the [pickle](https://docs.python.org/3/library/pickle.html) module to serialize the object you want to save. The pickled object will be accessible to your agent through the `self.data` attribute.
 
 For example, the contents of dictionary `my_data` can be saved to disk:
 ```
@@ -115,7 +115,7 @@ with open("data.pickle", 'wb') as f:
 - Create a performance baseline using `run_search.py` to evaluate the effectiveness of a baseline agent (e.g., an agent using your minimax or alpha-beta search code from the classroom)
 - Use `run_search.py` to evaluate the effectiveness of your agent using your own custom search techniques
 - You must decide whether to test with or without "fair" matches enabled--justify your choice in your report
-    
+
 **Hints:**
 - If the results are very close, try increasing the number of matches (e.g., >100) to increase your confidence in the results
 - Experiment with adding more search time--does adding time confer any advantage to your agent?
