@@ -28,6 +28,26 @@ In this project, you will extend the Sudoku-solving agent developed in the class
     `(aind)$ python solution.py`
 
 
+### Submit the project with Docker
+Having Docker installed in your system and after pulling the Conda image with `docker pull continuumio/anaconda3`.
+
+1. Run bash with docker and load the local directory as volume in container's `/root/src`. From your project's directory:
+
+    `docker run -v /<your-dir>/artificial-intelligence/Projects/1_Sudoku:/root/src  -i -t continuumio/anaconda3 /bin/bash`
+
+2. Install and run environment:
+
+    `(aind)$ cd /root/src/`
+    `(aind)$ conda env create -f conda.yaml`
+    `(aind)$ conda activate aind`
+
+3. Submit the solution:
+
+    `(aind)$ udacity submit`
+
+4. The zip file should have been downloaded in your local directory. Submit the file in the classroom page.
+
+
 ### Notes
 
 - You will not receive credit for the project until you submit the zip file created by `udacity submit` in your classroom.
