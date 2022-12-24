@@ -55,20 +55,30 @@ def naked_twins(values):
     """
     # one-pass to removed Naked Twins
     # get all unsolved boxes and sort based on # of possible values (less to more)
-    print('******************************************')
-    display(values)
-    ordered_unsolved = sorted([(box, v) for box, v in values if len(v) > 1], key=lambda x: len(x[1]))
-    for box, v in ordered_unsolved:
-        # for each unit, check if this box contains a value that can be elminited using naked twins
-        for unit in units[box]:
-            peer_possible_values = set([values[peer_box] for peer_box in unit if peer_box != box])
-            new_box_value = [ digit for digit in values[box] if digit not in peer_possible_values ]
-            if len(new_box_value) == 1:
-                values[box] = new_box_value[0]
-                break
-    display(values)
-    print('========================================')
-    return values
+    new_values = dict(values)
+    import collections
+    for unit in unitlist:
+        naked_candidates = collections.defaultdict(list)
+        # build a {"35" - > [B2,B3]} dictionary
+        for box in unit:
+            if (len(new_values[box])> 1):
+                naked_candidates[new_values[box]].append(box)
+        if naked_candidates:
+            print(naked_candidates)
+        # for naked twins/triplet to work, # of boxes must match # of possible values
+        filtered_canidates = { possible_values: boxes
+                               for possible_values, boxes in naked_candidates.items()
+                               if len(possible_values) == len(boxes)}
+        if filtered_canidates:
+            print(filtered_canidates)
+        # identify naked candidate:
+        for possible_values, candidate_boxes in filtered_canidates.items():
+            for box in unit:
+                if box not in candidate_boxes and len(new_values[box]) > 1:
+                    # remove the twin/triplets values from the list of possible values for all other unsolved boxes
+                    new_values[box] = "".join([digit for digit in new_values[box] if digit not in possible_values])
+                    print('removing {} from {} => values {} -> {}'.format(possible_values, box, values[box], new_values[box]))
+    return new_values
 
 def eliminate(values):
     """Apply the eliminate strategy to a Sudoku puzzle
