@@ -9,7 +9,7 @@ In this project, you will extend the Sudoku-solving agent developed in the class
 
 **YOU ONLY NEED TO WRITE CODE IN `solution.py`.**
 
-1. Follow the instructions in the classroom lesson to install and configure the `aind` [Anaconda](https://www.continuum.io/downloads) environment which includes several important packages that are used for the project. OS X or Unix/Linux users can activate the aind environment by running the following (Windows users simply run `activate aind`):
+1. Follow the instructions in the classroom lesson to install and configure the `aind` [Anaconda](https://www.anaconda.com/products/distribution) environment which includes several important packages that are used for the project. OS X or Unix/Linux users can activate the aind environment by running the following (Windows users simply run `activate aind`):
     
     `$ source activate aind`
 
