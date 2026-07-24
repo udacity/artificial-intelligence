@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-arena-beta"
+version = "0.2.0"
+description = "Local Knight Isolation developer-agent competition beta"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "alembic==1.16.4",
+  "fastapi==0.116.1",
+  "pydantic-settings==2.10.1",
+  "sqlalchemy==2.0.41",
+  "uvicorn[standard]==0.35.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx==0.28.1",
+  "pytest==8.4.1",
+  "ruff==0.12.3",
+]
+
+[project.scripts]
+agent-arena = "agent_arena_api.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["apps/api", "packages/isolation_engine", "packages/agent_runner"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [
+  ".venv",
+  "node_modules",
+  "dist",
+  "alembic/versions",
+  "tests/test_my_custom_player.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers"
+testpaths = ["tests/backend", "tests/integration"]
+markers = ["docker: requires the built local Docker runner image"]
+pythonpath = [
+  ".",
+  "apps/api",
+  "packages/isolation_engine",
+  "packages/agent_runner",
+]

@@ -1,0 +1,39 @@
+{
+  "name": "@agent-arena/web",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.17.0 <25"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --configLoader runner",
+    "build": "tsc --noEmit && vite build --configLoader runner",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit --pretty false",
+    "test": "vitest --configLoader runner"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "4.6.0",
+    "vite": "7.3.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.30.1",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "14.6.1",
+    "@types/node": "24.0.13",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "eslint": "9.30.1",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-refresh": "0.4.20",
+    "globals": "16.3.0",
+    "jsdom": "26.1.0",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.36.0",
+    "vitest": "3.2.7"
+  }
+}

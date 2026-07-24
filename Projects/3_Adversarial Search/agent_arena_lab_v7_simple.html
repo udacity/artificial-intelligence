@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Arena · Knight Isolation Concept</title>
+  <style>
+    :root{
+      --bg:#081019;--panel:#0d1722;--panel2:#101d2a;--panel3:#132333;
+      --text:#eef6ff;--muted:#91a5b8;--line:#203346;
+      --accent:#65f4c0;--blue:#79a8ff;--warn:#ffcb6b;--danger:#ff7d8f;
+      --success:#7ce7a4;--radius:17px;--shadow:0 20px 55px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;min-height:100vh;color:var(--text);
+      background:
+        radial-gradient(circle at 10% 0%,rgba(101,244,192,.08),transparent 28%),
+        radial-gradient(circle at 92% 8%,rgba(121,168,255,.07),transparent 25%),
+        var(--bg);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+      outline:2px solid var(--blue);outline-offset:2px
+    }
+    .app{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh}
+    .sidebar{
+      position:sticky;top:0;height:100vh;padding:21px 15px;border-right:1px solid var(--line);
+      background:rgba(8,16,25,.9);backdrop-filter:blur(18px);z-index:20
+    }
+    .brand{display:flex;align-items:center;gap:11px;padding:4px 7px 23px}
+    .brand-mark{
+      width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+      background:linear-gradient(145deg,var(--accent),#adffe2);color:#062118;
+      font-size:20px;font-weight:950;box-shadow:0 0 28px rgba(101,244,192,.17)
+    }
+    .brand h1{font-size:15px;margin:0}.brand small{color:var(--muted);font-size:11px}
+    .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:#5f778c;padding:10px}
+    .nav{display:grid;gap:6px}
+    .nav button{
+      border:1px solid transparent;background:transparent;color:var(--muted);
+      border-radius:12px;padding:11px;text-align:left;display:flex;gap:10px;align-items:center
+    }
+    .nav button:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .nav button.active{
+      color:var(--text);border-color:#28445a;
+      background:linear-gradient(90deg,rgba(101,244,192,.12),rgba(121,168,255,.05))
+    }
+    .nav-icon{width:24px;text-align:center}
+    .sidebar-note{
+      position:absolute;left:15px;right:15px;bottom:17px;padding:13px;
+      border:1px solid var(--line);background:var(--panel);border-radius:14px
+    }
+    .sidebar-note b{display:block;font-size:12px;margin-bottom:5px}
+    .tiny{font-size:11px;color:var(--muted);line-height:1.45}
+    main{min-width:0}
+    .topbar{
+      position:sticky;top:0;z-index:15;display:flex;align-items:center;justify-content:space-between;
+      padding:15px 27px;border-bottom:1px solid rgba(32,51,70,.86);
+      background:rgba(8,16,25,.78);backdrop-filter:blur(16px)
+    }
+    .crumb{font-size:12px;color:var(--muted)}.crumb strong{color:var(--text)}
+    .top-actions{display:flex;gap:9px;align-items:center}
+    .content{padding:27px;max-width:1540px;margin:0 auto}
+    .view{display:none;animation:fade .18s ease}.view.active{display:block}
+    @keyframes fade{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}
+    .pill,.status,.tag{
+      display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);
+      border-radius:999px;white-space:nowrap
+    }
+    .pill{padding:7px 10px;background:var(--panel);color:var(--muted);font-size:11px}
+    .status{padding:5px 7px;font-size:9px;font-weight:850;letter-spacing:.65px;text-transform:uppercase}
+    .status.active{color:#a9f8d8;background:rgba(101,244,192,.08);border-color:rgba(101,244,192,.26)}
+    .status.frozen{color:#b3c3d0;background:#152433;border-color:#294156}
+    .status.draft{color:#ffdda0;background:rgba(255,203,107,.07);border-color:rgba(255,203,107,.23)}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 11px var(--accent)}
+    .primary,.secondary,.ghost,.danger-btn{
+      border-radius:10px;padding:9px 13px;font-weight:800;border:1px solid transparent;transition:.17s
+    }
+    .primary{background:var(--accent);color:#052018}.primary:hover{transform:translateY(-1px)}
+    .secondary{background:#172838;border-color:#2a465d;color:var(--text)}
+    .ghost{background:transparent;border-color:var(--line);color:var(--muted)}
+    .danger-btn{background:rgba(255,125,143,.08);border-color:rgba(255,125,143,.23);color:#ffb9c3}
+    .secondary:hover,.ghost:hover{background:#1c3042;color:var(--text)}
+    .card,.hero-copy,.hero-side{
+      border:1px solid var(--line);border-radius:var(--radius);
+      background:linear-gradient(180deg,rgba(16,29,42,.97),rgba(11,22,32,.97));
+      box-shadow:var(--shadow)
+    }
+    .card{padding:19px}
+    .hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(330px,.7fr);gap:18px}
+    .hero-copy{padding:29px;position:relative;overflow:hidden}
+    .hero-copy:after{
+      content:"";position:absolute;width:320px;height:320px;right:-130px;top:-170px;border-radius:50%;
+      background:radial-gradient(circle,rgba(101,244,192,.15),transparent 68%)
+    }
+    .hero-side{padding:19px;display:grid;gap:13px;align-content:start}
+    .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);font-weight:900}
+    h2{font-size:35px;line-height:1.08;margin:11px 0 12px;max-width:780px}
+    h3{margin:0;font-size:19px}
+    .lead{color:#a8bac9;line-height:1.62;margin:0;max-width:820px}
+    .hero-actions,.controls{display:flex;gap:8px;flex-wrap:wrap}.hero-actions{margin-top:21px}
+    .metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+    .metric{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0a1520}
+    .metric b{display:block;font-size:20px}.metric span{font-size:10px;color:var(--muted)}
+    .callout{padding:13px;border-radius:12px;background:rgba(101,244,192,.065);border:1px solid rgba(101,244,192,.2);font-size:12px;line-height:1.5;color:#b9e9d8}
+    .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:25px 0 12px}
+    .section-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .steps-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .simple-step{padding:14px;border:1px solid var(--line);border-radius:13px;background:#0b1722}
+    .simple-step span{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:rgba(101,244,192,.1);color:var(--accent);font-size:11px;font-weight:900}
+    .simple-step b{display:block;margin:9px 0 4px;font-size:13px}
+    .simple-step p{margin:0;color:var(--muted);font-size:11px;line-height:1.45}
+    .tag{font-size:9px;text-transform:uppercase;letter-spacing:.75px;padding:5px 7px;background:#142638;color:#9fb6ca;border-color:#213a4f}
+    .tags{display:flex;gap:6px;flex-wrap:wrap}
+    .fixture-rule{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:13px;background:#0a1520}
+    .fixture-leg{text-align:center}.fixture-leg b{display:block;font-size:13px}.fixture-leg span{font-size:10px;color:var(--muted)}
+    .fixture-arrow{color:var(--warn);font-weight:900}
+    .board{
+      display:grid;gap:3px;aspect-ratio:11/9;width:100%;padding:3px;
+      background:#14283a;border-radius:12px;overflow:hidden
+    }
+    .cell{
+      border:0;min-width:0;min-height:0;display:grid;place-items:center;background:#102231;
+      position:relative;color:var(--text);user-select:none
+    }
+    .cell.alt{background:#0d1d2a}
+    .cell.blocked{background:repeating-linear-gradient(135deg,#182938,#182938 5px,#142431 5px,#142431 10px)}
+    .cell.blocked:after{content:"×";font-size:10px;color:#526a7c}
+    .cell.last{box-shadow:inset 0 0 0 2px var(--warn)}
+    .piece{
+      width:72%;height:72%;border-radius:50%;display:grid;place-items:center;
+      font-size:clamp(10px,1.4vw,21px);font-weight:950;box-shadow:0 7px 16px rgba(0,0,0,.3)
+    }
+    .piece.p1{background:linear-gradient(145deg,#acffe2,var(--accent));color:#062019}
+    .piece.p2{background:linear-gradient(145deg,#b9ceff,var(--blue));color:#08172b}
+    .overview-match{display:grid;grid-template-columns:minmax(390px,1.1fr) minmax(300px,.9fr);gap:16px}
+    .board-shell{padding:14px;border:1px solid var(--line);border-radius:16px;background:#07111a}
+    .match-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+    .match-head b{display:block}.match-head span{font-size:10px;color:var(--muted)}
+    .score-strip{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0a1520}
+    .agent-id strong{display:block}.agent-id small{color:var(--blue);font-size:10px}.agent-id.right{text-align:right}
+    .vs{font-size:10px;color:var(--muted);font-weight:900}
+    .event-log{display:grid;gap:7px;max-height:325px;overflow:auto}
+    .event-row{display:grid;grid-template-columns:52px 1fr;gap:9px;padding:9px;border-radius:10px;border:1px solid #1c3041;background:#0a1520;font-size:11px;color:#a9bdcc}
+    .event-row b{color:var(--text)}.event-row .time{color:#647f94}
+    .leaderboard{width:100%;border-collapse:collapse}
+    .leaderboard th,.leaderboard td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}
+    .leaderboard th{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#6f899f}
+    .leaderboard tbody tr{cursor:pointer}.leaderboard tbody tr:hover{background:#112131}
+    .rank{font-size:16px;font-weight:950}.avatar{width:30px;height:30px;display:inline-grid;place-items:center;border-radius:9px;background:#183148;margin-right:8px;font-size:10px;font-weight:900}
+    .developer{color:var(--blue);font-size:10px}
+    .points{font-size:17px;font-weight:950;color:var(--accent)}
+    .form{display:flex;gap:3px}.form i{width:8px;height:8px;border-radius:50%;display:block;background:var(--success)}.form i.loss{background:var(--danger)}.form i.draw{background:var(--warn)}
+    .profile{display:grid;gap:12px}
+    .profile-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+    .record-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .record{padding:10px;border:1px solid var(--line);border-radius:11px;background:#0a1520}
+    .record b{display:block}.record span{font-size:9px;color:var(--muted)}
+    .id-line{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;color:#829db1}
+    .workspace{
+      display:grid;grid-template-columns:minmax(410px,.95fr) minmax(460px,1.05fr);
+      min-height:730px;border:1px solid var(--line);border-radius:17px;overflow:hidden;background:#09131d;box-shadow:var(--shadow)
+    }
+    .workspace-left,.workspace-right{min-width:0;display:grid}
+    .workspace-left{grid-template-rows:minmax(390px,1.15fr) minmax(260px,.85fr);border-right:1px solid var(--line)}
+    .workspace-right{grid-template-rows:minmax(455px,1fr) 260px}
+    .pane{min-height:0;position:relative}
+    .game-pane{padding:13px;border-bottom:1px solid var(--line);display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+    .game-board-wrap{display:grid;place-items:center;min-height:0;padding:10px}
+    .game-board-wrap .board{max-width:610px;max-height:490px}
+    .viewer-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .viewer-controls button{padding:7px 10px}
+    .scrubber{flex:1;min-width:120px;accent-color:var(--accent)}
+    .problem-pane{padding:15px;overflow:auto;background:#0d1823}
+    .problem-tabs{display:flex;gap:6px;margin-bottom:12px}
+    .problem-tab,.console-tab{
+      border:1px solid transparent;background:transparent;color:var(--muted);padding:7px 9px;border-radius:8px;font-size:10px;font-weight:850
+    }
+    .problem-tab.active,.console-tab.active{color:var(--text);border-color:#2c485e;background:#142537}
+    .problem-panel{display:none}.problem-panel.active{display:block}
+    .problem-panel h3{font-size:16px;margin-bottom:8px}.problem-panel p,.problem-panel li{font-size:11px;color:#a7bac9;line-height:1.55}
+    .editor-pane{display:grid;grid-template-rows:auto minmax(0,1fr);border-bottom:1px solid var(--line);background:#0a131d}
+    .editor-toolbar,.console-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 11px;border-bottom:1px solid var(--line);background:#111f2c}
+    .editor-toolbar select{background:#0a1520;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11px}
+    .editor-meta{display:flex;align-items:center;gap:7px}
+    .editor-wrap{display:grid;grid-template-columns:42px minmax(0,1fr);min-height:0}
+    .line-numbers{
+      padding:13px 8px;text-align:right;background:#07111a;color:#496579;overflow:hidden;
+      font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre
+    }
+    #codeEditor{
+      width:100%;height:100%;resize:none;border:0;outline:0;padding:13px;background:#0a131d;color:#d8e7f3;
+      font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;tab-size:4;white-space:pre;overflow:auto
+    }
+    .console-pane{display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:#08121b}
+    .console-body{padding:11px;overflow:auto;font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#9fb5c6;white-space:pre-wrap}
+    .log-info{color:#9fb5c6}.log-ok{color:var(--success)}.log-warn{color:var(--warn)}.log-error{color:var(--danger)}.log-out{color:var(--blue)}
+    .workspace-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:9px 11px;border-top:1px solid var(--line);background:#111f2c}
+    .workspace-actions button{padding:9px 8px}
+    .agent-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .agent-card{padding:17px;border:1px solid var(--line);border-radius:15px;background:var(--panel)}
+    .agent-card h3{font-size:16px;margin:8px 0 2px}
+    .agent-card .top{display:flex;justify-content:space-between;gap:10px}
+    .agent-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+    .agent-stats div{padding:9px;border-radius:10px;background:#0a1520;border:1px solid var(--line)}
+    .agent-stats b{display:block;font-size:13px}.agent-stats span{font-size:9px;color:var(--muted)}
+    .version-list{display:grid;gap:7px;margin-top:12px}
+    .version-row{display:grid;grid-template-columns:55px 1fr auto;gap:9px;align-items:center;padding:9px;border-radius:10px;background:#0a1520;border:1px solid var(--line);font-size:10px}
+    .version-row strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .submission-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(310px,.9fr);gap:16px}
+    .mode-tabs{display:flex;gap:7px;margin-bottom:15px}
+    .mode-tab{border:1px solid var(--line);background:#0a1520;color:var(--muted);padding:8px 11px;border-radius:9px;font-size:11px;font-weight:800}
+    .mode-tab.active{color:var(--text);border-color:rgba(101,244,192,.35);background:rgba(101,244,192,.07)}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:10px;color:#9eb2c3}
+    .input,select.input{
+      width:100%;background:#0a1520;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 10px;outline:0
+    }
+    .fixed-value{padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#0a1520;font-size:11px}
+    .pipeline{display:grid;gap:8px}
+    .pipeline-row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0a1520}
+    .pipeline-row .num{width:25px;height:25px;border-radius:7px;display:grid;place-items:center;background:#142b3c;color:var(--accent);font-size:9px;font-weight:900}
+    .pipeline-row b{font-size:11px}.pipeline-row span{font-size:9px;color:var(--muted)}
+    .check{color:var(--success);font-weight:900}.pending{color:var(--warn)}
+    .mobile-nav{display:none}
+    .toast{
+      position:fixed;right:20px;bottom:20px;z-index:50;padding:11px 14px;border-radius:11px;
+      background:#13283a;border:1px solid #31536b;box-shadow:var(--shadow);transform:translateY(100px);opacity:0;transition:.2s
+    }
+    .toast.show{transform:none;opacity:1}
+    @media(max-width:1120px){
+      .hero,.overview-match,.submission-layout{grid-template-columns:1fr}
+      .workspace{grid-template-columns:1fr;min-height:0}
+      .workspace-left{border-right:0;border-bottom:1px solid var(--line)}
+      .workspace-left{grid-template-rows:auto auto}.workspace-right{grid-template-rows:500px 250px}
+      .event-log{max-height:250px}
+    }
+    @media(max-width:850px){
+      .app{display:block}.sidebar{display:none}.content{padding:17px 14px 86px}.topbar{padding:12px 14px}
+      .mobile-nav{
+        position:fixed;display:flex;left:8px;right:8px;bottom:8px;z-index:40;justify-content:space-around;
+        padding:6px;border-radius:14px;border:1px solid var(--line);background:rgba(12,23,34,.96);backdrop-filter:blur(14px)
+      }
+      .mobile-nav button{border:0;background:transparent;color:var(--muted);padding:8px 5px;font-size:9px}
+      .grid-2,.grid-3,.steps-row,.agent-cards{grid-template-columns:1fr}
+      .metric-grid{grid-template-columns:repeat(3,1fr)}
+      .record-grid{grid-template-columns:repeat(2,1fr)}
+      .workspace-left{grid-template-rows:auto auto}.workspace-right{grid-template-rows:480px 250px}
+      .game-pane{padding:9px}.game-board-wrap{padding:5px}
+      h2{font-size:29px}
+      .leaderboard th:nth-child(4),.leaderboard td:nth-child(4),.leaderboard th:nth-child(7),.leaderboard td:nth-child(7){display:none}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">♞</div>
+      <div><h1>Agent Arena</h1><small>Knight Isolation</small></div>
+    </div>
+    <div class="nav-label">Competition</div>
+    <nav class="nav">
+      <button class="active" data-view="overview"><span class="nav-icon">◫</span>Overview</button>
+      <button data-view="workspace"><span class="nav-icon">⌨</span>Code &amp; Play</button>
+      <button data-view="leaderboard"><span class="nav-icon">↗</span>Leaderboard</button>
+      <button data-view="myagents"><span class="nav-icon">◇</span>My Agents</button>
+      <button data-view="submission"><span class="nav-icon">⇧</span>Submit Agent</button>
+    </nav>
+    <div class="sidebar-note">
+      <b>Conceptual UI prototype</b>
+      <div class="tiny">No code is executed, no package is uploaded, and no match result is calculated by a backend.</div>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div class="crumb">Knight Isolation / <strong id="crumbTitle">Overview</strong></div>
+      <div class="top-actions">
+        <span class="pill"><span class="live-dot"></span>Permanent competition</span>
+        <button class="primary" data-jump="workspace">Open Code Lab</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="view active" id="overview">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">One game · one permanent points table</div>
+            <h2>Submit once. Your Knight Isolation agent keeps competing.</h2>
+            <p class="lead">Write a Python agent, test it against a baseline, deploy an immutable version, and follow its fixtures on a simple permanent leaderboard.</p>
+            <div class="hero-actions">
+              <button class="primary" data-jump="workspace">Start coding</button>
+              <button class="secondary" data-jump="leaderboard">View standings</button>
+            </div>
+          </div>
+          <div class="hero-side">
+            <div class="eyebrow">Competition at a glance</div>
+            <div class="metric-grid">
+              <div class="metric"><b>64</b><span>Active agent versions</span></div>
+              <div class="metric"><b>1,248</b><span>Completed fixtures</span></div>
+              <div class="metric"><b>150 ms</b><span>Fixed move budget</span></div>
+            </div>
+            <div class="fixture-rule">
+              <div class="fixture-leg"><b>Game A</b><span>Agent 1 starts</span></div>
+              <div class="fixture-arrow">⇄</div>
+              <div class="fixture-leg"><b>Game B</b><span>Agent 2 starts</span></div>
+            </div>
+            <div class="callout"><b>Simple points:</b> a fixture win earns 3 points, a 1–1 mirrored draw earns 1 point per agent, and a loss earns 0.</div>
+          </div>
+        </div>
+
+        <div class="section-head"><div><h3>How it works</h3><p>The smallest coherent version of the arena.</p></div></div>
+        <div class="steps-row">
+          <div class="simple-step"><span>1</span><b>Write</b><p>Implement <code>get_action(state)</code> in the browser Code Lab.</p></div>
+          <div class="simple-step"><span>2</span><b>Test</b><p>Run conceptual scrimmages against a stable baseline and inspect logs.</p></div>
+          <div class="simple-step"><span>3</span><b>Submit</b><p>Create an immutable Python build under fixed platform limits.</p></div>
+          <div class="simple-step"><span>4</span><b>Compete</b><p>The platform assigns mirrored fixtures and updates simple points.</p></div>
+        </div>
+
+        <div class="section-head"><div><h3>Featured fixture</h3><p>A public replay from the permanent competition.</p></div><button class="ghost" data-jump="workspace">Open full viewer →</button></div>
+        <div class="overview-match">
+          <div class="board-shell">
+            <div class="match-head">
+              <div><b>Atlas-AB v17 vs MobilityLab v12</b><span>Fixture KI-01248 · Game A of 2</span></div>
+              <span class="status active">Official</span>
+            </div>
+            <div class="board" id="overviewBoard"></div>
+          </div>
+          <div class="card">
+            <div class="score-strip">
+              <div class="agent-id"><strong>Atlas-AB v17</strong><small>@ali-lab</small></div>
+              <div class="vs">VS</div>
+              <div class="agent-id right"><strong>MobilityLab v12</strong><small>@nova-byte</small></div>
+            </div>
+            <div class="event-log" id="overviewLog" style="margin-top:12px"></div>
+            <div class="callout" style="margin-top:12px">Fixture result: Atlas-AB wins both mirrored games, earns <b>3 points</b>; MobilityLab earns <b>0</b>.</div>
+          </div>
+        </div>
+
+        <div class="section-head"><div><h3>Top of the table</h3><p>All agents shown have completed the same number of fixtures.</p></div><button class="ghost" data-jump="leaderboard">Full leaderboard →</button></div>
+        <div class="card" style="overflow:auto">
+          <table class="leaderboard">
+            <thead><tr><th>#</th><th>Agent</th><th>Developer</th><th>Fixtures</th><th>W-D-L</th><th>Points</th></tr></thead>
+            <tbody id="overviewStandings"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="view" id="workspace">
+        <div class="section-head">
+          <div><h3>Code &amp; Play</h3><p>A compact game viewer, problem statement, Python editor, and console inspired by browser coding arenas.</p></div>
+          <span class="pill">Simulation only · code is not executed</span>
+        </div>
+
+        <div class="workspace">
+          <div class="workspace-left">
+            <div class="pane game-pane">
+              <div class="match-head">
+                <div><b id="workspaceMatchTitle">YourAgent vs GreedyFox</b><span id="workspaceMatchMeta">Practice fixture · Game A · seed demo-17</span></div>
+                <span class="status draft" id="workspaceMatchState">Ready</span>
+              </div>
+              <div class="game-board-wrap"><div class="board" id="workspaceBoard"></div></div>
+              <div class="viewer-controls">
+                <button class="ghost" id="resetReplay">↺</button>
+                <button class="ghost" id="prevMove">←</button>
+                <button class="secondary" id="playReplay">▶ Play</button>
+                <button class="ghost" id="nextMove">→</button>
+                <input class="scrubber" id="replayRange" type="range" min="0" max="16" value="0" aria-label="Replay position">
+                <span class="pill" id="moveLabel">Move 0 / 16</span>
+              </div>
+            </div>
+
+            <div class="pane problem-pane">
+              <div class="problem-tabs" role="tablist" aria-label="Challenge information">
+                <button class="problem-tab active" data-problem-tab="goal" role="tab" aria-selected="true">The Goal</button>
+                <button class="problem-tab" data-problem-tab="rules" role="tab" aria-selected="false">Rules</button>
+                <button class="problem-tab" data-problem-tab="api" role="tab" aria-selected="false">Agent API</button>
+              </div>
+              <div class="problem-panel active" data-problem-panel="goal">
+                <h3>Block your opponent before they block you.</h3>
+                <p>Each agent controls one knight. Every square a knight leaves becomes blocked forever. The first agent with no legal knight move loses.</p>
+                <div class="tags"><span class="tag">Adversarial search</span><span class="tag">Perfect information</span><span class="tag">150 ms / move</span></div>
+              </div>
+              <div class="problem-panel" data-problem-panel="rules">
+                <ol>
+                  <li>The board is 11 × 9.</li>
+                  <li>Opening placements may use any open square.</li>
+                  <li>Later actions use chess-knight movement.</li>
+                  <li>Visited squares become permanently blocked.</li>
+                  <li>A timeout, crash, or illegal action loses the game.</li>
+                  <li>A ranked fixture contains two games with starting order swapped.</li>
+                </ol>
+              </div>
+              <div class="problem-panel" data-problem-panel="api">
+                <p><code>get_action(state)</code> must return one legal action before the fixed deadline.</p>
+                <p>The conceptual state exposes:</p>
+                <ul><li><code>state.actions()</code></li><li><code>state.result(action)</code></li><li><code>state.player()</code></li><li><code>state.liberties(location)</code></li></ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="workspace-right">
+            <div class="pane editor-pane">
+              <div class="editor-toolbar">
+                <div class="editor-meta">
+                  <select aria-label="Runtime" disabled><option>Python 3.12</option></select>
+                  <span class="pill">agent.py</span>
+                </div>
+                <div class="controls">
+                  <button class="ghost" id="resetCode">Reset</button>
+                  <button class="ghost" id="copyCode">Copy</button>
+                </div>
+              </div>
+              <div class="editor-wrap">
+                <div class="line-numbers" id="lineNumbers" aria-hidden="true"></div>
+                <textarea id="codeEditor" spellcheck="false" aria-label="Python agent code"></textarea>
+              </div>
+            </div>
+
+            <div class="pane console-pane">
+              <div class="console-toolbar">
+                <div class="problem-tabs" style="margin:0">
+                  <button class="console-tab active">Console output</button>
+                </div>
+                <span class="pill" id="consoleState">Idle</span>
+              </div>
+              <div class="console-body" id="consoleOutput" aria-live="polite"></div>
+              <div class="workspace-actions">
+                <button class="secondary" id="runCode">▶ Run code <small>(simulated)</small></button>
+                <button class="secondary" id="replaySame">↺ Replay same conditions</button>
+                <button class="primary" id="sendToSubmission">✓ Prepare submission</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="leaderboard">
+        <div class="section-head">
+          <div><h3>Permanent Knight Isolation leaderboard</h3><p>No rating model: only equal-fixture totals using 3 points for a win, 1 for a draw, and 0 for a loss.</p></div>
+          <span class="pill">42 fixtures per active version</span>
+        </div>
+        <div class="callout" style="margin-bottom:14px"><b>Fixture definition:</b> agents play two mirrored games. A 2–0 result is a win; 1–1 is a draw; 0–2 is a loss.</div>
+        <div class="grid-2" style="grid-template-columns:minmax(0,1.4fr) minmax(300px,.6fr)">
+          <div class="card" style="overflow:auto">
+            <table class="leaderboard">
+              <thead><tr><th>#</th><th>Agent version</th><th>Developer</th><th>Fixtures</th><th>Wins</th><th>Draws</th><th>Losses</th><th>Points</th><th>Form</th></tr></thead>
+              <tbody id="leaderboardBody"></tbody>
+            </table>
+          </div>
+          <div class="card profile">
+            <div class="profile-head">
+              <div><div class="eyebrow">Selected competitor</div><h3 id="profileName" style="margin:8px 0 2px">Atlas-AB v17</h3><div class="developer" id="profileDeveloper">@ali-lab</div></div>
+              <span class="status active" id="profileStatus">Active</span>
+            </div>
+            <div class="id-line" id="profileIds">AGT-KI-00017 · AGV-KI-00017-17 · build 8fa31c2</div>
+            <div class="record-grid">
+              <div class="record"><b id="profilePoints">88</b><span>Points</span></div>
+              <div class="record"><b id="profileWins">28</b><span>Wins</span></div>
+              <div class="record"><b id="profileDraws">4</b><span>Draws</span></div>
+              <div class="record"><b id="profileLosses">10</b><span>Losses</span></div>
+            </div>
+            <div class="callout" id="profileNote">Strong mobility heuristic with stable time management.</div>
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px">Recent fixtures</div>
+              <div class="event-log" id="profileMatches"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="myagents">
+        <div class="section-head">
+          <div><h3>My Agents</h3><p>Manage your Knight Isolation lineages and immutable versions.</p></div>
+          <button class="primary" data-jump="submission">Submit new agent</button>
+        </div>
+        <div class="callout" style="margin-bottom:14px">Only one version per lineage is active in the permanent points table. Older versions remain privately visible and auditable.</div>
+        <div class="agent-cards" id="myAgentCards"></div>
+      </section>
+
+      <section class="view" id="submission">
+        <div class="section-head">
+          <div><h3>Submission Lab</h3><p>A condensed conceptual flow for creating a new agent or immutable version.</p></div>
+          <span class="pill">No real upload or deployment</span>
+        </div>
+        <div class="submission-layout">
+          <div class="card">
+            <div class="mode-tabs">
+              <button class="mode-tab active" data-submit-mode="new">New agent</button>
+              <button class="mode-tab" data-submit-mode="version">New version</button>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label for="submissionAgentName">Agent name</label><input class="input" id="submissionAgentName" value="MyKnightAgent"></div>
+              <div class="field"><label for="submissionDeveloper">Developer nickname</label><input class="input" id="submissionDeveloper" value="@ali-dev"></div>
+              <div class="field" id="parentField" style="display:none"><label for="parentAgent">Parent lineage</label><select class="input" id="parentAgent"><option value="Atlas-AB">Atlas-AB · AGT-KI-00017</option><option value="PartitionScout">PartitionScout · AGT-KI-00043</option></select></div>
+              <div class="field"><label>Permanent game</label><div class="fixed-value"><b>Knight Isolation</b> · locked</div></div>
+              <div class="field"><label>Runtime</label><div class="fixed-value"><b>Python 3.12</b> · pinned</div></div>
+              <div class="field"><label>Move budget</label><div class="fixed-value"><b>150 ms</b> · platform controlled</div></div>
+              <div class="field full"><label>Code source</label><div class="fixed-value" id="codeSourceValue">Code Lab buffer · unsaved draft</div></div>
+              <div class="field full"><label>Public identity preview</label><div class="callout" id="submissionPreview"></div></div>
+            </div>
+            <div class="controls" style="margin-top:14px">
+              <button class="secondary" id="validateSubmission">Run conceptual checks</button>
+              <button class="primary" id="deploySubmission">Create immutable build</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="eyebrow">Conceptual pipeline</div>
+            <h3 style="font-size:16px;margin:8px 0 12px">What the finished platform would do</h3>
+            <div class="pipeline" id="submissionPipeline">
+              <div class="pipeline-row"><div class="num">1</div><div><b>Package</b><span>Snapshot source and assign stable IDs.</span></div><b class="pending">Waiting</b></div>
+              <div class="pipeline-row"><div class="num">2</div><div><b>Check safety</b><span>Conceptual screening before isolated execution.</span></div><b class="pending">Waiting</b></div>
+              <div class="pipeline-row"><div class="num">3</div><div><b>Validate</b><span>Import, legal actions, deterministic replay and timeouts.</span></div><b class="pending">Waiting</b></div>
+              <div class="pipeline-row"><div class="num">4</div><div><b>Deploy version</b><span>Immutable private build enters the points competition.</span></div><b class="pending">Waiting</b></div>
+            </div>
+            <div class="section-head" style="margin-top:17px"><div><h3 style="font-size:14px">Fixed platform policies</h3></div></div>
+            <div class="tiny">No network · read-only root · bounded scratch space · CPU, wall-time, memory and output limits · private source by default · auditable replay artifacts.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<nav class="mobile-nav">
+  <button data-view="overview">Overview</button>
+  <button data-view="workspace">Code</button>
+  <button data-view="leaderboard">Table</button>
+  <button data-view="myagents">Agents</button>
+  <button data-view="submission">Submit</button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const starterCode = `from math import inf
+
+class CustomPlayer:
+    """Knight Isolation agent."""
+
+    def get_action(self, state):
+        # Always return a legal action before the deadline.
+        legal_moves = state.actions()
+
+        if not legal_moves:
+            return None
+
+        # Replace this baseline with iterative deepening,
+        # alpha-beta pruning, and a custom heuristic.
+        best_move = legal_moves[0]
+        best_score = -inf
+
+        for action in legal_moves:
+            next_state = state.result(action)
+            score = self.evaluate(next_state)
+
+            if score > best_score:
+                best_score = score
+                best_move = action
+
+        return best_move
+
+    def evaluate(self, state):
+        own_moves = len(state.actions())
+        # A real heuristic would estimate the opponent's
+        # future mobility and territory as well.
+        return own_moves
+`;
+
+const replayMoves = [
+  {p:0,to:[4,5],note:"YourAgent opens near the center."},
+  {p:1,to:[8,10],note:"GreedyFox chooses the lower-right corner."},
+  {p:0,to:[2,4],note:"YourAgent preserves eight candidate regions."},
+  {p:1,to:[6,9],note:"GreedyFox follows its immediate-mobility rule."},
+  {p:0,to:[0,3],note:"Upper corridor pressure begins."},
+  {p:1,to:[4,8],note:"GreedyFox avoids the edge trap."},
+  {p:0,to:[1,5],note:"Search reaches simulated depth 6."},
+  {p:1,to:[2,7],note:"Both agents contest the central bridge."},
+  {p:0,to:[3,4],note:"YourAgent closes a return route."},
+  {p:1,to:[0,8],note:"GreedyFox keeps two liberties."},
+  {p:0,to:[5,3],note:"The board begins to partition."},
+  {p:1,to:[1,6],note:"GreedyFox uses 18 ms."},
+  {p:0,to:[7,2],note:"YourAgent enters the lower territory."},
+  {p:1,to:[3,5],note:"The central bridge is contested."},
+  {p:0,to:[5,1],note:"GreedyFox is nearly isolated."},
+  {p:1,to:[5,4],note:"Final simulated move before evaluation."}
+];
+
+const standings = [
+  {name:"Atlas-AB",version:17,developer:"@ali-lab",fixtures:42,w:28,d:4,l:10,points:88,status:"Active",agentId:"AGT-KI-00017",versionId:"AGV-KI-00017-17",build:"8fa31c2",note:"Strong mobility heuristic with stable time management.",form:["W","W","D","W","L"],matches:["W 2–0 vs MobilityLab","W 2–0 vs KnightLite","D 1–1 vs PruneTheory","W 2–0 vs GreedyFox"]},
+  {name:"MobilityLab",version:12,developer:"@nova-byte",fixtures:42,w:25,d:7,l:10,points:82,status:"Active",agentId:"AGT-KI-00029",versionId:"AGV-KI-00029-12",build:"f192bd0",note:"Principal-variation search with excellent clock discipline.",form:["L","W","W","D","W"],matches:["L 0–2 vs Atlas-AB","W 2–0 vs RandomKnight","W 2–0 vs GreedyFox","D 1–1 vs PruneTheory"]},
+  {name:"PruneTheory",version:8,developer:"@game-theorist",fixtures:42,w:22,d:8,l:12,points:74,status:"Active",agentId:"AGT-KI-00038",versionId:"AGV-KI-00038-08",build:"31e0aa9",note:"Aggressive pruning with a parity-aware territory evaluation.",form:["D","W","L","W","D"],matches:["D 1–1 vs Atlas-AB","W 2–0 vs KnightLite","L 0–2 vs MobilityLab","W 2–0 vs RandomKnight"]},
+  {name:"KnightLite",version:12,developer:"@baseline-bob",fixtures:42,w:20,d:7,l:15,points:67,status:"Active",agentId:"AGT-KI-00005",versionId:"AGV-KI-00005-12",build:"b0011aa",note:"A stable fixed-depth baseline used for onboarding and comparison.",form:["L","L","W","D","W"],matches:["L 0–2 vs Atlas-AB","L 0–2 vs PruneTheory","W 2–0 vs GreedyFox","D 1–1 vs MobilityLab"]},
+  {name:"GreedyFox",version:5,developer:"@starter-kit",fixtures:42,w:14,d:5,l:23,points:47,status:"Active",agentId:"AGT-KI-00002",versionId:"AGV-KI-00002-05",build:"44ac712",note:"One-ply mobility baseline: transparent, fast, and intentionally exploitable.",form:["L","L","W","L","D"],matches:["L 0–2 vs Atlas-AB","L 0–2 vs MobilityLab","W 2–0 vs RandomKnight","L 0–2 vs KnightLite"]},
+  {name:"RandomKnight",version:2,developer:"@academy-lab",fixtures:42,w:5,d:2,l:35,points:17,status:"Active",agentId:"AGT-KI-00001",versionId:"AGV-KI-00001-02",build:"09ca113",note:"Uniform legal-action floor for smoke tests.",form:["L","L","L","W","L"],matches:["L 0–2 vs MobilityLab","L 0–2 vs GreedyFox","L 0–2 vs KnightLite","W 2–0 vs RandomKnight v1"]}
+];
+
+const myAgents = [
+  {name:"Atlas-AB",agentId:"AGT-KI-00017",active:17,points:88,record:"28-4-10",build:"8fa31c2",last:"2–0 win vs MobilityLab",versions:[
+    {v:17,status:"Active",build:"8fa31c2",points:88},
+    {v:16,status:"Frozen",build:"72d90ab",points:61},
+    {v:15,status:"Frozen",build:"11b8ca0",points:39}
+  ]},
+  {name:"PartitionScout",agentId:"AGT-KI-00043",active:4,points:53,record:"16-5-21",build:"2b18f9a",last:"1–1 draw vs KnightLite",versions:[
+    {v:4,status:"Active",build:"2b18f9a",points:53},
+    {v:3,status:"Frozen",build:"7180c2e",points:31},
+    {v:2,status:"Frozen",build:"c91a2d0",points:14}
+  ]}
+];
+
+let currentView = "overview";
+let replayIndex = 0;
+let replayTimer = null;
+let selectedAgent = standings[0];
+let submissionMode = "new";
+let codePrepared = false;
+
+function esc(value){
+  return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]));
+}
+function toast(message){
+  const element=document.getElementById("toast");
+  element.textContent=message;element.classList.add("show");
+  clearTimeout(element._timer);element._timer=setTimeout(()=>element.classList.remove("show"),1800);
+}
+function switchView(id){
+  currentView=id;
+  document.querySelectorAll(".view").forEach(view=>view.classList.toggle("active",view.id===id));
+  document.querySelectorAll("[data-view]").forEach(button=>button.classList.toggle("active",button.dataset.view===id));
+  const labels={overview:"Overview",workspace:"Code & Play",leaderboard:"Leaderboard",myagents:"My Agents",submission:"Submit Agent"};
+  document.getElementById("crumbTitle").textContent=labels[id];
+  if(id==="workspace")renderWorkspace();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("[data-view]").forEach(button=>button.addEventListener("click",()=>switchView(button.dataset.view)));
+document.querySelectorAll("[data-jump]").forEach(button=>button.addEventListener("click",()=>switchView(button.dataset.jump)));
+
+function stateAt(count){
+  const state=Array.from({length:9},()=>Array(11).fill(null));
+  const positions=[null,null],blocked=new Set();let last=null;
+  for(let i=0;i<count;i++){
+    const move=replayMoves[i];
+    if(positions[move.p])blocked.add(positions[move.p].join(","));
+    positions[move.p]=move.to;last=move.to;
+  }
+  blocked.forEach(key=>{const [r,c]=key.split(",").map(Number);state[r][c]={type:"blocked"}});
+  positions.forEach((pos,index)=>{if(pos)state[pos[0]][pos[1]]={type:index===0?"p1":"p2",label:"♞"}});
+  return {state,last};
+}
+function renderBoard(target,count){
+  const board=typeof target==="string"?document.getElementById(target):target;
+  const data=stateAt(Math.max(0,Math.min(count,replayMoves.length)));
+  board.style.gridTemplateColumns="repeat(11,1fr)";board.style.gridTemplateRows="repeat(9,1fr)";
+  board.innerHTML="";
+  for(let r=0;r<9;r++)for(let c=0;c<11;c++){
+    const cell=document.createElement("div");cell.className=`cell ${(r+c)%2?"alt":""}`;
+    const item=data.state[r][c];
+    if(item?.type==="blocked")cell.classList.add("blocked");
+    if(item&&item.type!=="blocked")cell.innerHTML=`<span class="piece ${item.type}">${item.label}</span>`;
+    if(data.last&&data.last[0]===r&&data.last[1]===c)cell.classList.add("last");
+    board.appendChild(cell);
+  }
+}
+function renderOverview(){
+  renderBoard("overviewBoard",12);
+  document.getElementById("overviewLog").innerHTML=replayMoves.slice(7,12).map((move,index)=>`<div class="event-row"><span class="time">M${index+8}</span><div><b>${move.p===0?"Atlas-AB":"MobilityLab"}</b><br>${esc(move.note)}</div></div>`).join("");
+  document.getElementById("overviewStandings").innerHTML=standings.slice(0,4).map((agent,index)=>`<tr data-overview-agent="${agent.name}">
+    <td class="rank">${index+1}</td><td><b>${agent.name} v${agent.version}</b></td><td><span class="developer">${agent.developer}</span></td>
+    <td>${agent.fixtures}</td><td>${agent.w}-${agent.d}-${agent.l}</td><td class="points">${agent.points}</td></tr>`).join("");
+}
+
+function renderWorkspace(){
+  renderBoard("workspaceBoard",replayIndex);
+  document.getElementById("replayRange").value=replayIndex;
+  document.getElementById("moveLabel").textContent=`Move ${replayIndex} / ${replayMoves.length}`;
+}
+function stopReplay(){
+  clearInterval(replayTimer);replayTimer=null;document.getElementById("playReplay").textContent="▶ Play";
+}
+function playReplay(){
+  if(replayTimer){stopReplay();return}
+  if(replayIndex>=replayMoves.length)replayIndex=0;
+  document.getElementById("playReplay").textContent="Ⅱ Pause";
+  replayTimer=setInterval(()=>{
+    replayIndex++;renderWorkspace();
+    if(replayIndex>=replayMoves.length)stopReplay();
+  },650);
+}
+document.getElementById("playReplay").addEventListener("click",playReplay);
+document.getElementById("nextMove").addEventListener("click",()=>{stopReplay();replayIndex=Math.min(replayIndex+1,replayMoves.length);renderWorkspace()});
+document.getElementById("prevMove").addEventListener("click",()=>{stopReplay();replayIndex=Math.max(replayIndex-1,0);renderWorkspace()});
+document.getElementById("resetReplay").addEventListener("click",()=>{stopReplay();replayIndex=0;renderWorkspace()});
+document.getElementById("replayRange").addEventListener("input",event=>{stopReplay();replayIndex=Number(event.target.value);renderWorkspace()});
+document.getElementById("replaySame").addEventListener("click",()=>{stopReplay();replayIndex=0;renderWorkspace();toast("Same conceptual seed restored")});
+
+document.querySelectorAll("[data-problem-tab]").forEach(button=>button.addEventListener("click",()=>{
+  document.querySelectorAll("[data-problem-tab]").forEach(item=>{const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-selected",String(active))});
+  document.querySelectorAll("[data-problem-panel]").forEach(panel=>panel.classList.toggle("active",panel.dataset.problemPanel===button.dataset.problemTab));
+}));
+
+const editor=document.getElementById("codeEditor");
+const lineNumbers=document.getElementById("lineNumbers");
+function updateLineNumbers(){
+  const count=editor.value.split("\n").length;
+  lineNumbers.textContent=Array.from({length:count},(_,i)=>i+1).join("\n");
+  lineNumbers.scrollTop=editor.scrollTop;
+}
+editor.value=starterCode;updateLineNumbers();
+editor.addEventListener("input",()=>{updateLineNumbers();codePrepared=false;document.getElementById("codeSourceValue").textContent="Code Lab buffer · modified draft"});
+editor.addEventListener("scroll",()=>lineNumbers.scrollTop=editor.scrollTop);
+editor.addEventListener("keydown",event=>{
+  if(event.key==="Tab"){
+    event.preventDefault();const start=editor.selectionStart,end=editor.selectionEnd;
+    editor.value=editor.value.slice(0,start)+"    "+editor.value.slice(end);
+    editor.selectionStart=editor.selectionEnd=start+4;updateLineNumbers();
+  }
+});
+document.getElementById("resetCode").addEventListener("click",()=>{editor.value=starterCode;updateLineNumbers();toast("Starter code restored")});
+document.getElementById("copyCode").addEventListener("click",async()=>{
+  try{await navigator.clipboard.writeText(editor.value);toast("Code copied")}
+  catch{toast("Clipboard access unavailable in this preview")}
+});
+
+function setConsole(lines,state){
+  const consoleBox=document.getElementById("consoleOutput");
+  consoleBox.innerHTML=lines.map(line=>`<div class="${line.kind}">${esc(line.text)}</div>`).join("");
+  document.getElementById("consoleState").textContent=state;
+  consoleBox.scrollTop=consoleBox.scrollHeight;
+}
+function simulateCodeRun(){
+  stopReplay();replayIndex=0;renderWorkspace();
+  const code=editor.value;
+  const lines=[
+    {kind:"log-info",text:"> Preparing isolated Python 3.12 practice worker..."},
+    {kind:"log-info",text:"> Loading Knight Isolation engine demo-rules-1.0..."}
+  ];
+  if(!code.includes("class CustomPlayer")){
+    lines.push({kind:"log-error",text:"ValidationError: class CustomPlayer was not found."});
+    setConsole(lines,"Failed");document.getElementById("workspaceMatchState").textContent="Validation failed";return;
+  }
+  if(!code.includes("get_action")){
+    lines.push({kind:"log-error",text:"ValidationError: get_action(state) was not found."});
+    setConsole(lines,"Failed");document.getElementById("workspaceMatchState").textContent="Validation failed";return;
+  }
+  const forbidden=["socket","requests","subprocess","multiprocessing"];
+  const found=forbidden.find(token=>code.includes(token));
+  if(found){
+    lines.push({kind:"log-error",text:`PolicyError: '${found}' is unavailable in the ranked sandbox.`});
+    setConsole(lines,"Blocked");document.getElementById("workspaceMatchState").textContent="Policy blocked";return;
+  }
+  lines.push(
+    {kind:"log-ok",text:"✓ Import and interface checks passed."},
+    {kind:"log-ok",text:"✓ 100 conceptual legal-action checks passed."},
+    {kind:"log-warn",text:"! This browser prototype does not execute submitted Python."},
+    {kind:"log-out",text:"Practice fixture: YourAgent 1–1 GreedyFox"},
+    {kind:"log-out",text:"Game A: win in 34 moves · Game B: loss in 31 moves"},
+    {kind:"log-ok",text:"Practice result only — no leaderboard points awarded."}
+  );
+  setConsole(lines,"Simulation complete");
+  document.getElementById("workspaceMatchState").textContent="Practice complete";
+  document.getElementById("workspaceMatchState").className="status active";
+  replayTimer=setInterval(()=>{
+    replayIndex++;renderWorkspace();
+    if(replayIndex>=replayMoves.length)stopReplay();
+  },260);
+}
+document.getElementById("runCode").addEventListener("click",simulateCodeRun);
+document.getElementById("sendToSubmission").addEventListener("click",()=>{
+  codePrepared=true;document.getElementById("codeSourceValue").textContent="Code Lab buffer · prepared for conceptual submission";
+  switchView("submission");toast("Code Lab draft attached to the submission preview");
+});
+
+function formDots(form){
+  return `<div class="form">${form.map(value=>`<i class="${value==="L"?"loss":value==="D"?"draw":""}" title="${value}"></i>`).join("")}</div>`;
+}
+function renderLeaderboard(){
+  document.getElementById("leaderboardBody").innerHTML=standings.map((agent,index)=>`<tr data-agent="${agent.name}" tabindex="0">
+    <td class="rank">${index+1}</td><td><span class="avatar">${agent.name.slice(0,2).toUpperCase()}</span><b>${agent.name} v${agent.version}</b></td>
+    <td><span class="developer">${agent.developer}</span></td><td>${agent.fixtures}</td><td>${agent.w}</td><td>${agent.d}</td><td>${agent.l}</td>
+    <td class="points">${agent.points}</td><td>${formDots(agent.form)}</td></tr>`).join("");
+  document.querySelectorAll("[data-agent]").forEach(row=>{
+    const select=()=>showAgent(row.dataset.agent);
+    row.addEventListener("click",select);
+    row.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();select()}});
+  });
+  showAgent(selectedAgent.name);
+}
+function showAgent(name){
+  const agent=standings.find(item=>item.name===name);if(!agent)return;selectedAgent=agent;
+  document.getElementById("profileName").textContent=`${agent.name} v${agent.version}`;
+  document.getElementById("profileDeveloper").textContent=agent.developer;
+  document.getElementById("profileIds").textContent=`${agent.agentId} · ${agent.versionId} · build ${agent.build}`;
+  document.getElementById("profilePoints").textContent=agent.points;
+  document.getElementById("profileWins").textContent=agent.w;
+  document.getElementById("profileDraws").textContent=agent.d;
+  document.getElementById("profileLosses").textContent=agent.l;
+  document.getElementById("profileNote").textContent=agent.note;
+  document.getElementById("profileMatches").innerHTML=agent.matches.map((match,index)=>`<div class="event-row"><span class="time">F-${42-index}</span><div><b>${esc(match.slice(0,1))}</b> ${esc(match.slice(2))}</div></div>`).join("");
+}
+
+function renderMyAgents(){
+  document.getElementById("myAgentCards").innerHTML=myAgents.map(agent=>`<article class="agent-card">
+    <div class="top"><div><span class="status active">Active v${agent.active}</span><h3>${esc(agent.name)}</h3><div class="developer">@ali-lab</div></div><div class="points">${agent.points} pts</div></div>
+    <div class="id-line" style="margin-top:8px">${esc(agent.agentId)} · build ${esc(agent.build)}</div>
+    <div class="agent-stats"><div><b>${esc(agent.record)}</b><span>W-D-L</span></div><div><b>${agent.versions.length}</b><span>Versions</span></div><div><b>${esc(agent.last)}</b><span>Latest fixture</span></div></div>
+    <div class="version-list">${agent.versions.map(version=>`<div class="version-row"><strong>v${version.v}</strong><div><b>build ${esc(version.build)}</b><div class="tiny">${version.points} historical points</div></div><span class="status ${version.status==="Active"?"active":"frozen"}">${version.status}</span></div>`).join("")}</div>
+    <div class="controls" style="margin-top:12px"><button class="secondary" data-new-version="${esc(agent.name)}">Deploy new version</button><button class="ghost" data-open-agent="${esc(agent.name)}">View in table</button></div>
+  </article>`).join("");
+  document.querySelectorAll("[data-new-version]").forEach(button=>button.addEventListener("click",()=>{
+    setSubmissionMode("version");document.getElementById("parentAgent").value=button.dataset.newVersion;
+    document.getElementById("submissionAgentName").value=button.dataset.newVersion;updateSubmissionPreview();switchView("submission");
+  }));
+  document.querySelectorAll("[data-open-agent]").forEach(button=>button.addEventListener("click",()=>{showAgent(button.dataset.openAgent);switchView("leaderboard")}));
+}
+
+function setSubmissionMode(mode){
+  submissionMode=mode;
+  document.querySelectorAll("[data-submit-mode]").forEach(button=>button.classList.toggle("active",button.dataset.submitMode===mode));
+  document.getElementById("parentField").style.display=mode==="version"?"grid":"none";
+  updateSubmissionPreview();
+}
+document.querySelectorAll("[data-submit-mode]").forEach(button=>button.addEventListener("click",()=>setSubmissionMode(button.dataset.submitMode)));
+function normalizedDeveloper(){
+  const raw=document.getElementById("submissionDeveloper").value.trim()||"anonymous";
+  return raw.startsWith("@")?raw:`@${raw}`;
+}
+function updateSubmissionPreview(){
+  const name=document.getElementById("submissionAgentName").value.trim()||"UnnamedAgent";
+  const developer=normalizedDeveloper();
+  const parent=document.getElementById("parentAgent").value;
+  const preview=document.getElementById("submissionPreview");
+  preview.textContent=submissionMode==="new"
+    ?`${name} v1 by ${developer} would create a new Knight Isolation lineage with stable agent and version IDs.`
+    :`${name} would create the next immutable version of ${parent}. The parent game remains locked to Knight Isolation and the previous version stays in history.`;
+}
+["submissionAgentName","submissionDeveloper","parentAgent"].forEach(id=>document.getElementById(id).addEventListener(id==="parentAgent"?"change":"input",updateSubmissionPreview));
+function resetPipeline(){
+  document.querySelectorAll("#submissionPipeline .pipeline-row > b:last-child").forEach(item=>{item.textContent="Waiting";item.className="pending"});
+}
+document.getElementById("validateSubmission").addEventListener("click",()=>{
+  resetPipeline();
+  const statuses=document.querySelectorAll("#submissionPipeline .pipeline-row > b:last-child");
+  ["Prepared","Passed","Passed"].forEach((text,index)=>setTimeout(()=>{statuses[index].textContent=text;statuses[index].className="check"},360*(index+1)));
+  setTimeout(()=>toast("Conceptual validation completed; no code was executed"),1250);
+});
+document.getElementById("deploySubmission").addEventListener("click",()=>{
+  const statuses=document.querySelectorAll("#submissionPipeline .pipeline-row > b:last-child");
+  statuses.forEach((item,index)=>setTimeout(()=>{item.textContent=index===3?"Previewed":"Passed";item.className="check"},250*(index+1)));
+  setTimeout(()=>toast("Immutable build preview created — no backend deployment occurred"),1200);
+});
+
+renderOverview();
+renderWorkspace();
+renderLeaderboard();
+renderMyAgents();
+updateSubmissionPreview();
+setConsole([
+  {kind:"log-info",text:"Knight Isolation Code Lab ready."},
+  {kind:"log-info",text:"Edit agent.py, then choose Run code (simulated)."},
+  {kind:"log-warn",text:"This conceptual prototype never executes the Python buffer."}
+],"Idle");
+</script>
+</body>
+</html>
